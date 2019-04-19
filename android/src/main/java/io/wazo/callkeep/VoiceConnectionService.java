@@ -19,9 +19,11 @@ package io.wazo.callkeep;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.speech.tts.Voice;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telecom.CallAudioState;
@@ -33,6 +35,10 @@ import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.util.Log;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_ANSWER_CALL;
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_AUDIO_SESSION;
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_DTMF_TONE;
@@ -43,17 +49,24 @@ import static io.wazo.callkeep.RNCallKeepModule.ACTION_ONGOING_CALL;
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_UNHOLD_CALL;
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_UNMUTE_CALL;
 import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALLER_NAME;
+import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_NUMBER;
 import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_UUID;
 
 // @see https://github.com/kbagchiGWC/voice-quickstart-android/blob/9a2aff7fbe0d0a5ae9457b48e9ad408740dfb968/exampleConnectionService/src/main/java/com/twilio/voice/examples/connectionservice/VoiceConnectionService.java
 @TargetApi(Build.VERSION_CODES.M)
 public class VoiceConnectionService extends ConnectionService {
-    private static Connection connection;
+    private static VoiceConnection connection;
     private static Boolean isAvailable = false;
     private static String TAG = "VoiceConnectionService";
+    private static Map<String, VoiceConnection> currentConnections = new HashMap<>();
 
     public static Connection getConnection() {
         return connection;
+    }
+
+    public VoiceConnectionService() {
+        super();
+        Log.e(TAG, "xxx");
     }
 
     public static void setAvailable(Boolean value) {
@@ -67,8 +80,16 @@ public class VoiceConnectionService extends ConnectionService {
 
     @Override
     public Connection onCreateIncomingConnection(PhoneAccountHandle connectionManagerPhoneAccount, ConnectionRequest request) {
+        Bundle extra = request.getExtras();
+        Uri number = request.getAddress();
+        String name = extra.getString(EXTRA_CALLER_NAME);
         Connection incomingCallConnection = createConnection(request);
         incomingCallConnection.setRinging();
+
+        if (name != null && number != null) {
+            incomingCallConnection.setAddress(number, TelecomManager.PRESENTATION_ALLOWED);
+            incomingCallConnection.setCallerDisplayName(name, TelecomManager.PRESENTATION_ALLOWED);
+        }
 
         return incomingCallConnection;
     }
@@ -78,12 +99,26 @@ public class VoiceConnectionService extends ConnectionService {
         if (!this.canMakeOutgoingCall()) {
             return Connection.createFailedConnection(new DisconnectCause(DisconnectCause.LOCAL));
         }
+        // TODO: Hold all other calls
 
-        Connection outgoingCallConnection = createConnection(request);
+        Bundle extras = request.getExtras();
+        Connection outgoingCallConnection = null;
+        String number = request.getAddress().getSchemeSpecificPart();
+        String extrasNumber = extras.getString(EXTRA_CALL_NUMBER);
+
+        if (extrasNumber != null && extrasNumber.equals(number)) {
+            outgoingCallConnection = createConnection(request);
+        } else {
+            String uuid = UUID.randomUUID().toString();
+            extras.putString(EXTRA_CALL_UUID, uuid);
+            extras.putString(EXTRA_CALLER_NAME, null);
+            extras.putString(EXTRA_CALL_NUMBER, number);
+            outgoingCallConnection = createConnection(request);
+        }
         outgoingCallConnection.setDialing();
         outgoingCallConnection.setAudioModeIsVoip(true);
 
-        sendCallRequestToActivity(ACTION_ONGOING_CALL, request.getAddress().getSchemeSpecificPart());
+        sendCallRequestToActivity(ACTION_ONGOING_CALL, number);
         sendCallRequestToActivity(ACTION_AUDIO_SESSION, null);
 
         return outgoingCallConnection;
@@ -99,11 +134,16 @@ public class VoiceConnectionService extends ConnectionService {
         connection = new VoiceConnection(this, extra.getString(EXTRA_CALL_UUID));
 
         connection.setConnectionCapabilities(Connection.CAPABILITY_MUTE | Connection.CAPABILITY_HOLD | Connection.CAPABILITY_SUPPORT_HOLD);
-        connection.setAddress(request.getAddress(), TelecomManager.PRESENTATION_ALLOWED);
         connection.setExtras(extra);
-        connection.setCallerDisplayName(extra.getString(EXTRA_CALLER_NAME), TelecomManager.PRESENTATION_ALLOWED);
-
+        currentConnections.put(extra.getString(EXTRA_CALL_UUID), connection);
         return connection;
+    }
+
+    @Override
+    public void onConference(Connection connection1, Connection connection2) {
+        super.onConference(connection1, connection2);
+        VoiceConnection voiceConnection1 = (VoiceConnection) connection1;
+        VoiceConnection voiceConnection2 = (VoiceConnection) connection2;
     }
 
     /*

@@ -55,6 +55,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     public static final String CHECKING_PERMS = "CHECKING_PERMS";
     public static final String EXTRA_CALLER_NAME = "EXTRA_CALLER_NAME";
     public static final String EXTRA_CALL_UUID = "EXTRA_CALL_UUID";
+    public static final String EXTRA_CALL_NUMBER = "EXTRA_CALL_NUMBER";
     public static final String ACTION_END_CALL = "ACTION_END_CALL";
     public static final String ACTION_ANSWER_CALL = "ACTION_ANSWER_CALL";
     public static final String ACTION_MUTE_CALL = "ACTION_MUTE_CALL";
@@ -122,7 +123,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void startCall(String number, String callerName) {
+    public void startCall(String uuid, String number, String callerName) {
         if (!isConnectionServiceAvailable() || !hasPhoneAccount() || !hasPermissions()) {
             return;
         }
@@ -132,6 +133,8 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
 
         Bundle callExtras = new Bundle();
         callExtras.putString(EXTRA_CALLER_NAME, callerName);
+        callExtras.putString(EXTRA_CALL_UUID, uuid);
+        callExtras.putString(EXTRA_CALL_NUMBER, number);
 
         extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, handle);
         extras.putParcelable(TelecomManager.EXTRA_OUTGOING_CALL_EXTRAS, callExtras);
@@ -140,7 +143,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void endCall() {
+    public void endCall(String uuid) {
         if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
             return;
         }

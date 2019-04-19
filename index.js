@@ -56,7 +56,7 @@ class RNCallKeep {
 
   startCall = (uuid, handle, handleType = 'number', hasVideo = false, contactIdentifier) => {
     if (!isIOS) {
-      RNCallKeepModule.startCall(uuid, andle, contactIdentifier);
+      RNCallKeepModule.startCall(uuid, handle, contactIdentifier);
       return;
     }
 
@@ -68,7 +68,7 @@ class RNCallKeep {
   };
 
   endCall = (uuid) => {
-    isIOS ? RNCallKeepModule.endCall(uuid) : RNCallKeepModule.endCall();
+    RNCallKeepModule.endCall(uuid);
   };
 
   endAllCalls = () => {

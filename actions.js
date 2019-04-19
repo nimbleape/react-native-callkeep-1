@@ -13,19 +13,10 @@ const RNCallKeepDidToggleHoldAction = 'RNCallKeepDidToggleHoldAction';
 const RNCallKeepDidPerformDTMFAction = 'RNCallKeepDidPerformDTMFAction';
 const isIOS = Platform.OS === 'ios';
 
-const didReceiveStartCallAction = handler => {
-  const listener = eventEmitter.addListener(
-    RNCallKeepDidReceiveStartCallAction, (data) => {
-      handler(isIOS ? data : { handle: data.number });
-    }
-  );
-
-  if (isIOS) {
-    RNCallKeepModule._startCallActionEventListenerAdded();
-  }
-
-  return listener;
-};
+const didReceiveStartCallAction = handler => 
+  eventEmitter.addListener(RNCallKeepDidReceiveStartCallAction, (data) => {
+    handler(data)
+  });
 
 const answerCall = handler =>
   eventEmitter.addListener(RNCallKeepPerformAnswerCallAction, (data) => handler(data));
