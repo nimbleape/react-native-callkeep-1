@@ -36,7 +36,9 @@ import android.telecom.TelecomManager;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_ANSWER_CALL;
@@ -118,7 +120,9 @@ public class VoiceConnectionService extends ConnectionService {
         outgoingCallConnection.setDialing();
         outgoingCallConnection.setAudioModeIsVoip(true);
 
-        sendCallRequestToActivity(ACTION_ONGOING_CALL, number);
+        HashMap<String, String> extrasMap = this.bundleToMap(extras);
+
+        sendCallRequestToActivity(ACTION_ONGOING_CALL, extrasMap);
         sendCallRequestToActivity(ACTION_AUDIO_SESSION, null);
 
         return outgoingCallConnection;
@@ -130,12 +134,13 @@ public class VoiceConnectionService extends ConnectionService {
 
     private Connection createConnection(ConnectionRequest request) {
 
-        Bundle extra = request.getExtras();
-        connection = new VoiceConnection(this, extra.getString(EXTRA_CALL_UUID));
+        Bundle extras = request.getExtras();
+        HashMap<String, String> extrasMap = this.bundleToMap(extras);
+        connection = new VoiceConnection(this, extrasMap);
 
         connection.setConnectionCapabilities(Connection.CAPABILITY_MUTE | Connection.CAPABILITY_HOLD | Connection.CAPABILITY_SUPPORT_HOLD);
-        connection.setExtras(extra);
-        currentConnections.put(extra.getString(EXTRA_CALL_UUID), connection);
+        connection.setExtras(extras);
+        currentConnections.put(extras.getString(EXTRA_CALL_UUID), connection);
         return connection;
     }
 
@@ -149,7 +154,7 @@ public class VoiceConnectionService extends ConnectionService {
     /*
      * Send call request to the RNCallKeepModule
      */
-    private void sendCallRequestToActivity(final String action, @Nullable final String attribute) {
+    private void sendCallRequestToActivity(final String action, @Nullable final HashMap attributeMap) {
         final VoiceConnectionService instance = this;
         final Handler handler = new Handler();
 
@@ -157,12 +162,26 @@ public class VoiceConnectionService extends ConnectionService {
             @Override
             public void run() {
                 Intent intent = new Intent(action);
-                if (attribute != null) {
-                    intent.putExtra("attribute", attribute);
+                if (attributeMap != null) {
+                    Bundle extras = new Bundle();
+                    extras.putSerializable("attributeMap", attributeMap);
+                    intent.putExtras(extras);
                 }
 
                 LocalBroadcastManager.getInstance(instance).sendBroadcast(intent);
             }
         });
+    }
+
+    private HashMap<String, String> bundleToMap(Bundle extras) {
+        HashMap<String, String> extrasMap = new HashMap<>();
+        Set<String> keySet = extras.keySet();
+        Iterator<String> iterator = keySet.iterator();
+
+        while(iterator.hasNext()) {
+            String key = iterator.next();
+            extrasMap.put(key, extras.getString(key));
+        }
+        return extrasMap;
     }
 }

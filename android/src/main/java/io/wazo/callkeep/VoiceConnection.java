@@ -16,6 +16,8 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_ANSWER_CALL;
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_AUDIO_SESSION;
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_DTMF_TONE;
@@ -29,10 +31,10 @@ import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_UUID;
 @TargetApi(Build.VERSION_CODES.M)
 public class VoiceConnection extends Connection {private String TAG = "VoiceConnection";
     private boolean isMuted = false;
-    private String handle = "";
+    private HashMap<String, String> handle;
     private Context context;
 
-    VoiceConnection(Context context, String handle) {
+    VoiceConnection(Context context, HashMap<String, String> handle) {
         super();
         this.handle = handle;
         this.context = context;
@@ -41,7 +43,7 @@ public class VoiceConnection extends Connection {private String TAG = "VoiceConn
     @Override
     public void onExtrasChanged(Bundle extras) {
         super.onExtrasChanged(extras);
-        handle = extras.getString(EXTRA_CALL_UUID);
+        handle = (HashMap<String, String>)extras.getSerializable("attributeMap");
     }
 
     @Override
@@ -66,7 +68,8 @@ public class VoiceConnection extends Connection {private String TAG = "VoiceConn
 
     @Override
     public void onPlayDtmfTone(char dtmf) {
-        sendCallRequestToActivity(ACTION_DTMF_TONE, String.valueOf(dtmf));
+        handle.put("DTMF", Character.toString(dtmf));
+        sendCallRequestToActivity(ACTION_DTMF_TONE, handle);
     }
 
     @Override
@@ -111,7 +114,7 @@ public class VoiceConnection extends Connection {private String TAG = "VoiceConn
     /*
      * Send call request to the RNCallKeepModule
      */
-    private void sendCallRequestToActivity(final String action, @Nullable final String attribute) {
+    private void sendCallRequestToActivity(final String action, @Nullable final HashMap attributeMap) {
         final VoiceConnection instance = this;
         final Handler handler = new Handler();
 
@@ -119,8 +122,10 @@ public class VoiceConnection extends Connection {private String TAG = "VoiceConn
             @Override
             public void run() {
                 Intent intent = new Intent(action);
-                if (attribute != null) {
-                    intent.putExtra("attribute", attribute);
+                if (attributeMap != null) {
+                    Bundle extras = new Bundle();
+                    extras.putSerializable("attributeMap", attributeMap);
+                    intent.putExtras(extras);
                 }
 
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
