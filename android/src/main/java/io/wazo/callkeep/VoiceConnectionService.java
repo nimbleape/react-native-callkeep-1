@@ -35,11 +35,14 @@ import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_ANSWER_CALL;
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_AUDIO_SESSION;
@@ -53,6 +56,7 @@ import static io.wazo.callkeep.RNCallKeepModule.ACTION_UNMUTE_CALL;
 import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALLER_NAME;
 import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_NUMBER;
 import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_UUID;
+import static io.wazo.callkeep.RNCallKeepModule.handle;
 
 // @see https://github.com/kbagchiGWC/voice-quickstart-android/blob/9a2aff7fbe0d0a5ae9457b48e9ad408740dfb968/exampleConnectionService/src/main/java/com/twilio/voice/examples/connectionservice/VoiceConnectionService.java
 @TargetApi(Build.VERSION_CODES.M)
@@ -137,10 +141,22 @@ public class VoiceConnectionService extends ConnectionService {
         Bundle extras = request.getExtras();
         HashMap<String, String> extrasMap = this.bundleToMap(extras);
         connection = new VoiceConnection(this, extrasMap);
-
         connection.setConnectionCapabilities(Connection.CAPABILITY_MUTE | Connection.CAPABILITY_HOLD | Connection.CAPABILITY_SUPPORT_HOLD);
+        connection.setInitializing();
         connection.setExtras(extras);
         currentConnections.put(extras.getString(EXTRA_CALL_UUID), connection);
+
+        // Get other connections for conferencing
+        Map<String, VoiceConnection> otherConnections = new HashMap<>();
+        for (Map.Entry<String, VoiceConnection> entry : currentConnections.entrySet()) {
+            if(!(extras.getString(EXTRA_CALL_UUID).equals(entry.getKey()))) {
+                otherConnections.put(entry.getKey(), entry.getValue());
+            }
+        }
+        List<Connection> conferenceConnections = new ArrayList<Connection>(otherConnections.values());
+        connection.setConferenceableConnections(conferenceConnections);
+
+        connection.setInitialized();
         return connection;
     }
 
@@ -149,6 +165,17 @@ public class VoiceConnectionService extends ConnectionService {
         super.onConference(connection1, connection2);
         VoiceConnection voiceConnection1 = (VoiceConnection) connection1;
         VoiceConnection voiceConnection2 = (VoiceConnection) connection2;
+
+        PhoneAccountHandle phoneAccountHandle = RNCallKeepModule.handle;
+
+        VoiceConference voiceConference = new VoiceConference(handle);
+        voiceConference.addConnection(voiceConnection1);
+        voiceConference.addConnection(voiceConnection2);
+
+        connection1.onUnhold();
+        connection2.onUnhold();
+
+        this.addConference(voiceConference);
     }
 
     /*

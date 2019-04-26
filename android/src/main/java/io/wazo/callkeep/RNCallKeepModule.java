@@ -29,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -48,6 +49,8 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter;
 
 import java.util.HashMap;
+
+import static android.support.v4.app.ActivityCompat.requestPermissions;
 
 // @see https://github.com/kbagchiGWC/voice-quickstart-android/blob/9a2aff7fbe0d0a5ae9457b48e9ad408740dfb968/exampleConnectionService/src/main/java/com/twilio/voice/examples/connectionservice/VoiceConnectionServiceActivity.java
 public class RNCallKeepModule extends ReactContextBaseJavaModule {
@@ -70,12 +73,13 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
 
     private static final String E_ACTIVITY_DOES_NOT_EXIST = "E_ACTIVITY_DOES_NOT_EXIST";
     private static final String REACT_NATIVE_MODULE_NAME = "RNCallKeep";
-    private static final String[] permissions = { Manifest.permission.READ_PHONE_STATE, Manifest.permission.CALL_PHONE };
+    private static final String[] permissions = { Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.CALL_PHONE, Manifest.permission.RECORD_AUDIO };
 
     private static TelecomManager telecomManager;
     private static Promise hasPhoneAccountPromise;
     private ReactApplicationContext reactContext;
-    private static PhoneAccountHandle handle;
+    public static PhoneAccountHandle handle;
     private boolean isReceiverRegistered = false;
     private VoiceBroadcastReceiver voiceBroadcastReceiver;
 
@@ -92,15 +96,6 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
             registerReceiver();
             VoiceConnectionService.setAvailable(true);
         }
-    }
-
-    public static void onRequestPermissionsResult(int[] grantResults) {
-        if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-            hasPhoneAccountPromise.resolve(hasPhoneAccount());
-             return;
-        }
-
-        hasPhoneAccountPromise.resolve(false);
     }
 
     @Override
@@ -176,8 +171,8 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
         hasPhoneAccountPromise = promise;
 
         if (!this.hasPermissions()) {
-            ActivityCompat.requestPermissions(currentActivity, permissions, REQUEST_READ_PHONE_STATE);
-            return;
+            requestPermissions(currentActivity, permissions, REQUEST_READ_PHONE_STATE);
+             return;
         }
 
         promise.resolve(hasPhoneAccount());
@@ -337,6 +332,16 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
 
     private Context getAppContext() {
         return this.reactContext.getApplicationContext();
+    }
+
+    public static void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        for (int result : grantResults) {
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                hasPhoneAccountPromise.resolve(false);
+                return;
+            }
+        }
+        hasPhoneAccountPromise.resolve(true);
     }
 
     private class VoiceBroadcastReceiver extends BroadcastReceiver {

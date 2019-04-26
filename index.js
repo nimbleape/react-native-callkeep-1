@@ -146,7 +146,7 @@ class RNCallKeep {
   };
 
   _alert = async (options, condition) => new Promise((resolve, reject) => {
-    if (condition) {
+    if (!condition) {
       return resolve(false);
     }
 
