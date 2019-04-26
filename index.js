@@ -29,9 +29,9 @@ class RNCallKeep {
     this._callkitEventHandlers.delete(handler);
   };
 
-  setup = async (options) => {
+  setup = async (options, optionalPermissions) => {
     if (!isIOS) {
-      return this._setupAndroid(options.android);
+      return this._setupAndroid(options.android, optionalPermissions);
     }
 
     return this._setupIOS(options.ios);
@@ -127,9 +127,9 @@ class RNCallKeep {
     resolve(RNCallKeepModule.setup(options));
   });
 
-  _setupAndroid = async (options) => {
-    const hasAccount = await RNCallKeepModule.checkPhoneAccountPermission();
-    const shouldOpenAccounts = await this._alert(options, hasAccount);
+  _setupAndroid = async (options, optionalPermissions) => {
+    const showAccountAlert = await RNCallKeepModule.checkPhoneAccountPermission(optionalPermissions);
+    const shouldOpenAccounts = await this._alert(options, showAccountAlert);
 
     if (shouldOpenAccounts) {
       RNCallKeepModule.openPhoneAccounts();

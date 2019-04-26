@@ -41,14 +41,20 @@ import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import static android.support.v4.app.ActivityCompat.requestPermissions;
 
@@ -156,7 +162,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void checkPhoneAccountPermission(Promise promise) {
+    public void checkPhoneAccountPermission(ReadableArray optionalPermissions, Promise promise) {
         Activity currentActivity = this.getCurrentActivity();
 
         if (!isConnectionServiceAvailable()) {
@@ -167,15 +173,22 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
             promise.reject(E_ACTIVITY_DOES_NOT_EXIST, "Activity doesn't exist");
             return;
         }
+        String[] optionalPermsArr = new String[optionalPermissions.size()];
+        for (int i = 0; i < optionalPermissions.size(); i++) {
+            optionalPermsArr[i] = optionalPermissions.getString(i);
+        }
+
+        String[] allPermissions = Arrays.copyOf(permissions, permissions.length + optionalPermsArr.length);
+        System.arraycopy(optionalPermsArr, 0, allPermissions, permissions.length, optionalPermsArr.length);
 
         hasPhoneAccountPromise = promise;
 
         if (!this.hasPermissions()) {
-            requestPermissions(currentActivity, permissions, REQUEST_READ_PHONE_STATE);
+            requestPermissions(currentActivity, allPermissions, REQUEST_READ_PHONE_STATE);
              return;
         }
 
-        promise.resolve(hasPhoneAccount());
+        promise.resolve(!hasPhoneAccount());
     }
 
     @ReactMethod
@@ -310,6 +323,8 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     }
 
     private static boolean hasPhoneAccount() {
+        boolean avai = isConnectionServiceAvailable();
+        boolean telecom = telecomManager.getPhoneAccount(handle).isEnabled();
         return !isConnectionServiceAvailable() ? false : telecomManager.getPhoneAccount(handle).isEnabled();
     }
 
@@ -334,12 +349,15 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
         return this.reactContext.getApplicationContext();
     }
 
-    public static void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public static void onRequestPermissionsResult(int requestCode, String[] grantedPermissions, int[] grantResults) {
+        int permissionsIndex = 0;
+        List<String> permsList = Arrays.asList(permissions);
         for (int result : grantResults) {
-            if (result != PackageManager.PERMISSION_GRANTED) {
+            if (permsList.contains(grantedPermissions[permissionsIndex]) && result != PackageManager.PERMISSION_GRANTED) {
                 hasPhoneAccountPromise.resolve(false);
                 return;
             }
+            permissionsIndex++;
         }
         hasPhoneAccountPromise.resolve(true);
     }
