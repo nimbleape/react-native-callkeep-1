@@ -92,6 +92,7 @@ public class VoiceConnection extends Connection {private String TAG = "VoiceConn
     @Override
     public void onHold() {
         super.onHold();
+        this.setOnHold();
         sendCallRequestToActivity(ACTION_HOLD_CALL, handle);
     }
 

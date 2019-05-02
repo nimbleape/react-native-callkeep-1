@@ -228,6 +228,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
             return;
         }
 
+        conn.setConnectionCapabilities(conn.getConnectionCapabilities() | Connection.CAPABILITY_HOLD);
         conn.setActive();
     }
 
@@ -379,10 +380,12 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
                     break;
                 case ACTION_HOLD_CALL:
                     args.putBoolean("hold", true);
+                    args.putString("callUUID", attributeMap.get(EXTRA_CALL_UUID));
                     sendEventToJS("RNCallKeepDidToggleHoldAction", args);
                     break;
                 case ACTION_UNHOLD_CALL:
                     args.putBoolean("hold", false);
+                    args.putString("callUUID", attributeMap.get(EXTRA_CALL_UUID));
                     sendEventToJS("RNCallKeepDidToggleHoldAction", args);
                     break;
                 case ACTION_MUTE_CALL:

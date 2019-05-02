@@ -9,7 +9,7 @@ public class VoiceConference extends Conference {
     VoiceConference(PhoneAccountHandle phoneAccountHandle) {
         super(phoneAccountHandle);
         this.setActive();
-        this.setConnectionCapabilities(Connection.CAPABILITY_MUTE | Connection.CAPABILITY_HOLD | Connection.CAPABILITY_SUPPORT_HOLD);
+//        this.setConnectionCapabilities(Connection.CAPABILITY_MUTE | Connection.CAPABILITY_HOLD | Connection.CAPABILITY_SUPPORT_HOLD);
     }
 
     @Override
