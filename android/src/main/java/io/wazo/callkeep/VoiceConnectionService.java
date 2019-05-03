@@ -141,7 +141,7 @@ public class VoiceConnectionService extends ConnectionService {
         Bundle extras = request.getExtras();
         HashMap<String, String> extrasMap = this.bundleToMap(extras);
         connection = new VoiceConnection(this, extrasMap);
-        connection.setConnectionCapabilities(Connection.CAPABILITY_MUTE | Connection.CAPABILITY_HOLD | Connection.CAPABILITY_SUPPORT_HOLD);
+        connection.setConnectionCapabilities(Connection.CAPABILITY_MUTE | Connection.CAPABILITY_SUPPORT_HOLD);
         connection.setInitializing();
         connection.setExtras(extras);
         currentConnections.put(extras.getString(EXTRA_CALL_UUID), connection);
