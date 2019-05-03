@@ -311,8 +311,8 @@ RCT_EXPORT_METHOD(sendDTMF:(NSString *)uuidString dtmf:(NSString *)key)
     NSLog(@"[RNCallKeep][getProviderConfiguration]");
 #endif
     CXProviderConfiguration *providerConfiguration = [[CXProviderConfiguration alloc] initWithLocalizedName:_settings[@"appName"]];
-    providerConfiguration.supportsVideo = YES;
-    providerConfiguration.maximumCallGroups = 3;
+    providerConfiguration.supportsVideo = NO;
+    providerConfiguration.maximumCallGroups = 1;
     providerConfiguration.maximumCallsPerCallGroup = 1;
     providerConfiguration.supportedHandleTypes = [NSSet setWithObjects:[NSNumber numberWithInteger:CXHandleTypePhoneNumber], nil];
     if (_settings[@"imageName"]) {
