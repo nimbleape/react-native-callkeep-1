@@ -230,7 +230,7 @@ RCT_EXPORT_METHOD(setMutedCall:(NSString *)uuidString muted:(BOOL)muted)
     [self requestTransaction:transaction];
 }
 
-RCT_EXPORT_METHOD(sendDTMF:(NSString *)key to:(NSString *)uuidString)
+RCT_EXPORT_METHOD(sendDTMF:(NSString *)uuidString dtmf:(NSString *)key)
 {
 #ifdef DEBUG
     NSLog(@"[RNCallKeep][sendDTMF] key = %@", key);

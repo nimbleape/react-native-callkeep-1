@@ -89,6 +89,10 @@ class RNCallKeep {
     RNCallKeepModule.setMutedCall(uuid, muted);
   };
 
+  sendDTMF = (uuid, key) => {
+    RNCallKeepModule.sendDTMF(uuid, key);
+  }
+
   checkIfBusy = () =>
     Platform.OS === 'ios'
       ? RNCallKeepModule.checkIfBusy()
