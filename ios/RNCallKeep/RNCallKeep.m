@@ -22,10 +22,12 @@ static NSString *const RNCallKeepDidReceiveStartCallAction = @"RNCallKeepDidRece
 static NSString *const RNCallKeepPerformAnswerCallAction = @"RNCallKeepPerformAnswerCallAction";
 static NSString *const RNCallKeepPerformEndCallAction = @"RNCallKeepPerformEndCallAction";
 static NSString *const RNCallKeepDidActivateAudioSession = @"RNCallKeepDidActivateAudioSession";
+static NSString *const RNCallKeepDidDeactivateAudioSession = @"RNCallKeepDidDeactivateAudioSession";
 static NSString *const RNCallKeepDidDisplayIncomingCall = @"RNCallKeepDidDisplayIncomingCall";
 static NSString *const RNCallKeepDidPerformSetMutedCallAction = @"RNCallKeepDidPerformSetMutedCallAction";
 static NSString *const RNCallKeepPerformPlayDTMFCallAction = @"RNCallKeepDidPerformDTMFAction";
 static NSString *const RNCallKeepDidToggleHoldAction = @"RNCallKeepDidToggleHoldAction";
+static NSString *const RNCallKeepProviderReset = @"RNCallKeepProviderReset";
 
 @implementation RNCallKeep
 {
@@ -228,6 +230,19 @@ RCT_EXPORT_METHOD(setMutedCall:(NSString *)uuidString muted:(BOOL)muted)
     [self requestTransaction:transaction];
 }
 
+RCT_EXPORT_METHOD(sendDTMF:(NSString *)key to:(NSString *)uuidString)
+{
+#ifdef DEBUG
+    NSLog(@"[RNCallKeep][sendDTMF] key = %@", key);
+#endif
+    NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:uuidString];
+    CXPlayDTMFCallAction *dtmfAction = [[CXPlayDTMFCallAction alloc] initWithCallUUID:uuid digits:key type:CXPlayDTMFCallActionTypeHardPause];
+    CXTransaction *transaction = [[CXTransaction alloc] init];
+    [transaction addAction:dtmfAction];
+    
+    [self requestTransaction:transaction];
+}
+
 - (void)requestTransaction:(CXTransaction *)transaction
 {
 #ifdef DEBUG
@@ -299,7 +314,7 @@ RCT_EXPORT_METHOD(setMutedCall:(NSString *)uuidString muted:(BOOL)muted)
     providerConfiguration.supportsVideo = YES;
     providerConfiguration.maximumCallGroups = 3;
     providerConfiguration.maximumCallsPerCallGroup = 1;
-    providerConfiguration.supportedHandleTypes = [NSSet setWithObjects:[NSNumber numberWithInteger:CXHandleTypePhoneNumber], [NSNumber numberWithInteger:CXHandleTypeEmailAddress], [NSNumber numberWithInteger:CXHandleTypeGeneric], nil];
+    providerConfiguration.supportedHandleTypes = [NSSet setWithObjects:[NSNumber numberWithInteger:CXHandleTypePhoneNumber], nil];
     if (_settings[@"imageName"]) {
         providerConfiguration.iconTemplateImageData = UIImagePNGRepresentation([UIImage imageNamed:_settings[@"imageName"]]);
     }
@@ -316,7 +331,7 @@ RCT_EXPORT_METHOD(setMutedCall:(NSString *)uuidString muted:(BOOL)muted)
 #endif
 
     AVAudioSession* audioSession = [AVAudioSession sharedInstance];
-    [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
+    [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord withOptions:AVAudioSessionCategoryOptionAllowBluetooth error:nil];
 
     [audioSession setMode:AVAudioSessionModeVoiceChat error:nil];
 
@@ -420,6 +435,9 @@ continueUserActivity:(NSUserActivity *)userActivity
 #ifdef DEBUG
     NSLog(@"[RNCallKeep][providerDidReset]");
 #endif
+    //this means something big changed, so tell the JS. The JS should
+    //probably respond by hanging up all calls.
+    [self sendEventWithName:RNCallKeepProviderReset body:nil];
 }
 
 // Starting outgoing call
@@ -428,8 +446,12 @@ continueUserActivity:(NSUserActivity *)userActivity
 #ifdef DEBUG
     NSLog(@"[RNCallKeep][CXProviderDelegate][provider:performStartCallAction]");
 #endif
-    [self.callKeepProvider reportOutgoingCallWithUUID:action.callUUID startedConnectingAtDate:[NSDate date]];
+    //do this first, audio sessions are flakey
     [self configureAudioSession];
+    //tell the system we took it
+    [self.callKeepProvider reportOutgoingCallWithUUID:action.callUUID startedConnectingAtDate:[NSDate date]];
+    //tell the JS to actually make the call
+    [self sendEventWithName:RNCallKeepDidReceiveStartCallAction body:@{ @"callUUID": action.callUUID.UUIDString, @"number": action.handle.value }];
     [action fulfill];
 }
 
@@ -478,6 +500,15 @@ continueUserActivity:(NSUserActivity *)userActivity
     [action fulfill];
 }
 
+-(void)provider:(CXProvider *)provider performSetMutedCallAction:(CXSetMutedCallAction *)action
+{
+#ifdef DEBUG
+    NSLog(@"[RNCallKeep][CXProviderDelegate][provider:performSetMutedCallAction]");
+#endif
+    [self sendEventWithName:RNCallKeepDidPerformSetMutedCallAction body:@{ @"muted": @(action.muted) }];
+    [action fulfill];
+}
+
 - (void)provider:(CXProvider *)provider timedOutPerformingAction:(CXAction *)action
 {
 #ifdef DEBUG
@@ -498,15 +529,7 @@ continueUserActivity:(NSUserActivity *)userActivity
 #ifdef DEBUG
     NSLog(@"[RNCallKeep][CXProviderDelegate][provider:didDeactivateAudioSession]");
 #endif
-}
-
--(void)provider:(CXProvider *)provider performSetMutedCallAction:(CXSetMutedCallAction *)action
-{
-#ifdef DEBUG
-    NSLog(@"[RNCallKeep][CXProviderDelegate][provider:performSetMutedCallAction]");
-#endif
-    [self sendEventWithName:RNCallKeepDidPerformSetMutedCallAction body:@{ @"muted": @(action.muted) }];
-    [action fulfill];
+    [self sendEventWithName:RNCallKeepDidDeactivateAudioSession body:nil];
 }
 
 @end
