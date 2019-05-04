@@ -111,18 +111,20 @@ public class VoiceConnectionService extends ConnectionService {
         Connection outgoingCallConnection = null;
         String number = request.getAddress().getSchemeSpecificPart();
         String extrasNumber = extras.getString(EXTRA_CALL_NUMBER);
+        String name = extras.getString(EXTRA_CALLER_NAME);
 
         if (extrasNumber != null && extrasNumber.equals(number)) {
             outgoingCallConnection = createConnection(request);
         } else {
             String uuid = UUID.randomUUID().toString();
             extras.putString(EXTRA_CALL_UUID, uuid);
-            extras.putString(EXTRA_CALLER_NAME, null);
+            extras.putString(EXTRA_CALLER_NAME, name);
             extras.putString(EXTRA_CALL_NUMBER, number);
             outgoingCallConnection = createConnection(request);
         }
         outgoingCallConnection.setDialing();
         outgoingCallConnection.setAudioModeIsVoip(true);
+        outgoingCallConnection.setCallerDisplayName(name, TelecomManager.PRESENTATION_ALLOWED);
 
         HashMap<String, String> extrasMap = this.bundleToMap(extras);
 
