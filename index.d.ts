@@ -100,6 +100,13 @@ export default class RNCallKeep {
   }
 
   /**
+     * @descriptions sendDTMF is used to send DTMF tones to the PBX.
+  */
+  static sendDTMF(uuid: string, key: string) {
+
+  }
+
+  /**
      * @description setMutedCall method is available only on iOS.
   */
   static checkIfBusy(): Promise<boolean> {
