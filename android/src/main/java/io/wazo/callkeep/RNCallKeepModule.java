@@ -222,7 +222,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setOnMute(boolean mute) {
+    public void setMutedCall(String uuid, boolean mute) {
         Connection conn = VoiceConnectionService.getConnection();
         if (conn == null) {
             return;

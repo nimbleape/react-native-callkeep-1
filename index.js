@@ -81,11 +81,6 @@ class RNCallKeep {
     isIOS ? true : await RNCallKeepModule.hasPhoneAccount();
 
   setMutedCall = (uuid, muted) => {
-     if (!isIOS) {
-      // Can't mute on Android
-      return;
-    }
-
     RNCallKeepModule.setMutedCall(uuid, muted);
   };
 
@@ -123,12 +118,6 @@ class RNCallKeep {
   setOnHold = (hold) => {
     if (!isIOS) {
       RNCallKeepModule.setOnHold(hold);
-    }
-  }
-
-  setOnMute = (mute) => {
-    if (!isIOS) {
-      RNCallKeepModule.setOnMute(mute);
     }
   }
 

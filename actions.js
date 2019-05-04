@@ -29,7 +29,7 @@ const endCall = handler =>
 const didActivateAudioSession = handler =>
   eventEmitter.addListener(RNCallKeepDidActivateAudioSession, handler);
 
-const didDeactiviateAudioSession = handler =>
+const didDeactivateAudioSession = handler =>
   eventEmitter.addListener(RNCallKeepDidDeactivateAudioSession, handler);
 
 const didDisplayIncomingCall = handler =>
