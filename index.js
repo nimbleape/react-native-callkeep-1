@@ -116,6 +116,18 @@ class RNCallKeep {
     RNCallKeepModule.setCurrentCallActive();
   };
 
+  setOnHold = (hold) => {
+    if (!isIOS) {
+      RNCallKeepModule.setOnHold(hold);
+    }
+  }
+
+  setOnMute = (mute) => {
+    if (!isIOS) {
+      RNCallKeepModule.setOnMute(mute);
+    }
+  }
+
   _setupIOS = async (options) => new Promise((resolve, reject) => {
     if (!options.appName) {
       reject('RNCallKeep.setup: option "appName" is required');

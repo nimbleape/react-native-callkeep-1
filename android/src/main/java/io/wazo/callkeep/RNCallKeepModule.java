@@ -34,6 +34,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.telecom.CallAudioState;
 import android.telecom.Connection;
 import android.telecom.DisconnectCause;
 import android.telecom.PhoneAccount;
@@ -204,6 +205,32 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
         }
 
         promise.resolve(telecomManager.getDefaultOutgoingPhoneAccount("tel") != null);
+    }
+
+    @ReactMethod
+    public void setOnHold(boolean hold) {
+        Connection conn = VoiceConnectionService.getConnection();
+        if (conn == null) {
+            return;
+        }
+
+        if (hold == true) {
+            conn.onHold();
+        } else {
+            conn.onUnhold();
+        }
+    }
+
+    @ReactMethod
+    public void setOnMute(boolean mute) {
+        Connection conn = VoiceConnectionService.getConnection();
+        if (conn == null) {
+            return;
+        }
+
+        CallAudioState newAudioState = new CallAudioState(mute, conn.getCallAudioState().getRoute(),
+                conn.getCallAudioState().getSupportedRouteMask());
+        conn.onCallAudioStateChanged(newAudioState);
     }
 
     @ReactMethod

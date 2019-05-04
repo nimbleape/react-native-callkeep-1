@@ -11,6 +11,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.telecom.CallAudioState;
 import android.telecom.Connection;
 import android.telecom.DisconnectCause;
+import android.telecom.TelecomManager;
+import android.net.Uri;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -26,6 +28,8 @@ import static io.wazo.callkeep.RNCallKeepModule.ACTION_HOLD_CALL;
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_MUTE_CALL;
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_UNHOLD_CALL;
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_UNMUTE_CALL;
+import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALLER_NAME;
+import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_NUMBER;
 import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_UUID;
 
 @TargetApi(Build.VERSION_CODES.M)
@@ -38,6 +42,9 @@ public class VoiceConnection extends Connection {private String TAG = "VoiceConn
         super();
         this.handle = handle;
         this.context = context;
+
+//        setAddress(Uri.parse(handle.get(EXTRA_CALL_NUMBER)), TelecomManager.PRESENTATION_ALLOWED);
+        setCallerDisplayName(handle.get(EXTRA_CALLER_NAME), TelecomManager.PRESENTATION_ALLOWED);
     }
 
     @Override
@@ -60,6 +67,7 @@ public class VoiceConnection extends Connection {private String TAG = "VoiceConn
     public void onAnswer() {
         super.onAnswer();
 
+        setConnectionCapabilities(getConnectionCapabilities() | Connection.CAPABILITY_HOLD);
         setActive();
         setAudioModeIsVoip(true);
 
