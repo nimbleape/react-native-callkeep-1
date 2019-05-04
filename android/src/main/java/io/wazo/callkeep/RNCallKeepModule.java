@@ -234,6 +234,17 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void updateDisplay(String displayName, String uri) {
+        Connection conn = VoiceConnectionService.getConnection();
+        if (conn == null) {
+            return;
+        }
+
+        conn.setAddress(Uri.parse(uri), TelecomManager.PRESENTATION_ALLOWED);
+        conn.setCallerDisplayName(displayName, TelecomManager.PRESENTATION_ALLOWED);
+    }
+
+    @ReactMethod
     public void hasPhoneAccount(Promise promise) {
         promise.resolve(hasPhoneAccount());
     }

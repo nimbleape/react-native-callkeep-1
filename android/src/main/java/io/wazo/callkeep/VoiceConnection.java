@@ -43,8 +43,15 @@ public class VoiceConnection extends Connection {private String TAG = "VoiceConn
         this.handle = handle;
         this.context = context;
 
-//        setAddress(Uri.parse(handle.get(EXTRA_CALL_NUMBER)), TelecomManager.PRESENTATION_ALLOWED);
-        setCallerDisplayName(handle.get(EXTRA_CALLER_NAME), TelecomManager.PRESENTATION_ALLOWED);
+        String number = handle.get(EXTRA_CALL_NUMBER);
+        String name = handle.get(EXTRA_CALLER_NAME);
+
+        if (number != null) {
+            setAddress(Uri.parse(number), TelecomManager.PRESENTATION_ALLOWED);
+        }
+        if (name != null) {
+            setCallerDisplayName(name, TelecomManager.PRESENTATION_ALLOWED);
+        }
     }
 
     @Override

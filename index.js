@@ -115,6 +115,13 @@ class RNCallKeep {
     RNCallKeepModule.setCurrentCallActive();
   };
 
+  updateDisplay = (displayName, uri) => {
+    if (isIOS) {
+      return;
+    }
+    RNCallKeepModule.updateDisplay(displayName, uri)
+  }
+
   setOnHold = (hold) => {
     if (!isIOS) {
       RNCallKeepModule.setOnHold(hold);
