@@ -208,28 +208,35 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setOnHold(boolean hold) {
+    public void setOnHold(String uuid, boolean isOnHold) {
         Connection conn = VoiceConnectionService.getConnection();
         if (conn == null) {
             return;
         }
 
-        if (hold == true) {
-            conn.onHold();
-        } else {
+        if (isOnHold == true) {
             conn.onUnhold();
+        } else {
+            conn.onHold();
         }
     }
 
     @ReactMethod
-    public void setMutedCall(String uuid, boolean mute) {
+    public void setMutedCall(String uuid, boolean isMuted) {
         Connection conn = VoiceConnectionService.getConnection();
         if (conn == null) {
             return;
         }
 
-        CallAudioState newAudioState = new CallAudioState(mute, conn.getCallAudioState().getRoute(),
-                conn.getCallAudioState().getSupportedRouteMask());
+        CallAudioState newAudioState = null;
+        // if current state is set to mute, set new state to not muted
+        if (isMuted) {
+            newAudioState = new CallAudioState(false, conn.getCallAudioState().getRoute(),
+                    conn.getCallAudioState().getSupportedRouteMask());
+        } else {
+            newAudioState = new CallAudioState(true, conn.getCallAudioState().getRoute(),
+                    conn.getCallAudioState().getSupportedRouteMask());
+        }
         conn.onCallAudioStateChanged(newAudioState);
     }
 
