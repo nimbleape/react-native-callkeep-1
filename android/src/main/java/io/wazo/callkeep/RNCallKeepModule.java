@@ -127,6 +127,20 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void answerIncomingCall(String uuid) {
+        if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
+            return;
+        }
+
+        Connection conn = VoiceConnectionService.getConnection();
+        if (conn == null) {
+            return;
+        }
+
+        conn.onAnswer();
+    }
+
+    @ReactMethod
     public void startCall(String uuid, String number, String callerName) {
         if (!isConnectionServiceAvailable() || !hasPhoneAccount() || !hasPermissions()) {
             return;
