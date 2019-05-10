@@ -74,6 +74,7 @@ RCT_EXPORT_MODULE()
              RNCallKeepPerformAnswerCallAction,
              RNCallKeepPerformEndCallAction,
              RNCallKeepDidActivateAudioSession,
+             RNCallKeepDidDeactivateAudioSession,
              RNCallKeepDidDisplayIncomingCall,
              RNCallKeepDidPerformSetMutedCallAction,
              RNCallKeepPerformPlayDTMFCallAction,
