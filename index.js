@@ -75,6 +75,10 @@ class RNCallKeep {
     RNCallKeepModule.endCall(uuid);
   };
 
+  rejectCall = (uuid) => {
+    RNCallKeepModule.rejectCall(uuid);
+  }
+
   endAllCalls = () => {
     isIOS ? RNCallKeepModule.endAllCalls() : RNCallKeepModule.endCall();
   };

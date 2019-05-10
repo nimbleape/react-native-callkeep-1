@@ -51,7 +51,7 @@ public class VoiceConnection extends Connection {private String TAG = "VoiceConn
         if (number != null) {
             setAddress(Uri.parse(number), TelecomManager.PRESENTATION_ALLOWED);
         }
-        if (name != null) {
+        if (name != null && !name.equals("")) {
             setCallerDisplayName(name, TelecomManager.PRESENTATION_ALLOWED);
         }
     }
