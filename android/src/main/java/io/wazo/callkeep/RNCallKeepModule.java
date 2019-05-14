@@ -171,8 +171,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        conn.setDisconnected(new DisconnectCause(DisconnectCause.LOCAL));
-        conn.destroy();
+        conn.onDisconnect();
         VoiceConnectionService.deinitConnection();
     }
 
