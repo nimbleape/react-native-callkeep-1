@@ -1,4 +1,5 @@
-export type Events = 'didReceiveStartCallAction' |
+export type Events = 
+  'didReceiveStartCallAction' |
   'answerCall' |
   'endCall' |
   'didActivateAudioSession' |

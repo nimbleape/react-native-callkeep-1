@@ -16,9 +16,7 @@ const RNCallKeepProviderReset = 'RNCallKeepProviderReset';
 const isIOS = Platform.OS === 'ios';
 
 const didReceiveStartCallAction = handler => 
-  eventEmitter.addListener(RNCallKeepDidReceiveStartCallAction, (data) => {
-    handler(data)
-  });
+  eventEmitter.addListener(RNCallKeepDidReceiveStartCallAction, (data) => handler(data));
 
 const answerCall = handler =>
   eventEmitter.addListener(RNCallKeepPerformAnswerCallAction, (data) => handler(data));

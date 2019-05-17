@@ -85,16 +85,11 @@ class RNCallKeep {
 
   supportConnectionService = () => supportConnectionService;
 
-  hasPhoneAccount = async () =>
-    isIOS ? true : await RNCallKeepModule.hasPhoneAccount();
+  hasPhoneAccount = async () => isIOS ? true : await RNCallKeepModule.hasPhoneAccount();
 
-  setMutedCall = (uuid, isMuted) => {
-    RNCallKeepModule.setMutedCall(uuid, isMuted);
-  };
+  setMutedCall = (uuid, isMuted) => RNCallKeepModule.setMutedCall(uuid, isMuted);
 
-  sendDTMF = (uuid, key) => {
-    RNCallKeepModule.sendDTMF(uuid, key);
-  }
+  sendDTMF = (uuid, key) => RNCallKeepModule.sendDTMF(uuid, key);
 
   checkIfBusy = () =>
     Platform.OS === 'ios'
