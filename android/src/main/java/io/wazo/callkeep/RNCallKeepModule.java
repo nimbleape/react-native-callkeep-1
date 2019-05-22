@@ -26,6 +26,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -48,6 +51,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter;
 
@@ -56,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import static android.support.v4.app.ActivityCompat.requestPermissions;
 
@@ -89,13 +94,23 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     public static PhoneAccountHandle handle;
     private boolean isReceiverRegistered = false;
     private VoiceBroadcastReceiver voiceBroadcastReceiver;
+    private ReadableMap _settings;
 
     public RNCallKeepModule(ReactApplicationContext reactContext) {
         super(reactContext);
 
         this.reactContext = reactContext;
+    }
 
+    @Override
+    public String getName() {
+        return REACT_NATIVE_MODULE_NAME;
+    }
+
+    @ReactMethod
+    public void setup(ReadableMap options) {
         VoiceConnectionService.setAvailable(false);
+        this._settings = options;
 
         if (isConnectionServiceAvailable()) {
             this.registerPhoneAccount(this.getAppContext());
@@ -103,11 +118,6 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
             registerReceiver();
             VoiceConnectionService.setAvailable(true);
         }
-    }
-
-    @Override
-    public String getName() {
-        return REACT_NATIVE_MODULE_NAME;
     }
 
     @ReactMethod
@@ -363,9 +373,17 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
 
         handle = new PhoneAccountHandle(cName, appName);
 
-        PhoneAccount account = new PhoneAccount.Builder(handle, appName)
-                .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER)
-                .build();
+        PhoneAccount.Builder builder = new PhoneAccount.Builder(handle, appName)
+                .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER);
+
+        if (_settings != null && _settings.getString("imageName") != null) {
+
+            int identifier = appContext.getResources().getIdentifier("sim_icon", "drawable", appContext.getPackageName());
+            Icon icon = Icon.createWithResource(appContext, identifier);
+            builder.setIcon(icon);
+        }
+
+        PhoneAccount account = builder.build();
 
         telecomManager = (TelecomManager) this.getAppContext().getSystemService(this.getAppContext().TELECOM_SERVICE);
         telecomManager.registerPhoneAccount(account);
@@ -397,9 +415,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     }
 
     private static boolean hasPhoneAccount() {
-        boolean avai = isConnectionServiceAvailable();
-        boolean telecom = telecomManager.getPhoneAccount(handle).isEnabled();
-        return !isConnectionServiceAvailable() ? false : telecomManager.getPhoneAccount(handle).isEnabled();
+        return !isConnectionServiceAvailable() && telecomManager.getPhoneAccount(handle).isEnabled();
     }
 
     private void registerReceiver() {

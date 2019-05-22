@@ -46,6 +46,7 @@ const options = {
     alertDescription: 'This application needs to access your phone accounts',
     cancelButton: 'Cancel',
     okButton: 'ok',
+    imageName: 'phone_account_icon"
   }
 };
 
@@ -69,6 +70,9 @@ RNCallKeep.setup(options);
       Cancel button label
     - `okButton`: string (required)
       Ok button label
+    - `imageName`: string (optional)
+      The image to use in the Android Phone application's native UI for enabling/disabling calling accounts. Should be a 48x48 HDPI
+      grayscale PNG image. Must be in your drawable resources for the parent application.
 
 ## Methods
 
