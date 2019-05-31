@@ -46,8 +46,6 @@ public class VoiceConnection extends Connection {private String TAG = "VoiceConn
         String number = handle.get(EXTRA_CALL_NUMBER);
         String name = handle.get(EXTRA_CALLER_NAME);
 
-        setConnectionProperties(PROPERTY_SELF_MANAGED);
-
         if (number != null) {
             setAddress(Uri.parse(number), TelecomManager.PRESENTATION_ALLOWED);
         }
