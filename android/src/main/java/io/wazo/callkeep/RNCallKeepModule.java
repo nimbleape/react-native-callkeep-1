@@ -376,8 +376,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
         PhoneAccount.Builder builder = new PhoneAccount.Builder(handle, appName)
                 .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER);
 
-        if (_settings != null && _settings.getString("imageName") != null) {
-
+        if (_settings != null && _settings.hasKey("imageName")) {
             int identifier = appContext.getResources().getIdentifier(_settings.getString("imageName"), "drawable", appContext.getPackageName());
             Icon icon = Icon.createWithResource(appContext, identifier);
             builder.setIcon(icon);
