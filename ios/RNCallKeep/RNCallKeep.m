@@ -312,10 +312,19 @@ RCT_EXPORT_METHOD(sendDTMF:(NSString *)uuidString dtmf:(NSString *)key)
     NSLog(@"[RNCallKeep][getProviderConfiguration]");
 #endif
     CXProviderConfiguration *providerConfiguration = [[CXProviderConfiguration alloc] initWithLocalizedName:_settings[@"appName"]];
-    providerConfiguration.supportsVideo = NO;
+    providerConfiguration.supportsVideo = YES;
     providerConfiguration.maximumCallGroups = 3;
     providerConfiguration.maximumCallsPerCallGroup = 1;
     providerConfiguration.supportedHandleTypes = [NSSet setWithObjects:[NSNumber numberWithInteger:CXHandleTypePhoneNumber], nil];
+    if (_settings[@"supportsVideo"]) {
+        providerConfiguration.supportsVideo = _settings[@"supportsVideo"];
+    }
+    if (_settings[@"maximumCallGroups"]) {
+        providerConfiguration.maximumCallGroups = [_settings[@"maximumCallGroups"] integerValue];
+    }
+    if (_settings[@"maximumCallsPerCallGroup"]) {
+        providerConfiguration.maximumCallsPerCallGroup = [_settings[@"maximumCallsPerCallGroup"] integerValue];
+    }
     if (_settings[@"imageName"]) {
         providerConfiguration.iconTemplateImageData = UIImagePNGRepresentation([UIImage imageNamed:_settings[@"imageName"]]);
     }
