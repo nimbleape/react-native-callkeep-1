@@ -56,11 +56,17 @@ RNCallKeep.setup(options);
 - `options`: Object
   - `ios`: object
     - `appName`: string (required)
-      - It will be displayed on system UI when incoming calls received
+      It will be displayed on system UI when incoming calls received
     - `imageName`: string (optional)
-      - If provided, it will be displayed on system UI during the call
+      If provided, it will be displayed on system UI during the call
     - `ringtoneSound`: string (optional)
-      - If provided, it will be played when incoming calls received; the system will use the default ringtone if this is not provided
+      If provided, it will be played when incoming calls received; the system will use the default ringtone if this is not provided
+    - `maximumCallGroups`: string (optional)
+      If provided, the maximum number of call groups supported by this application (Default: 3)
+    - `maximumCallsPerCallGroup`: string (optional)
+      If provided, the maximum number of calls in a single group, used for conferencing (Default: 1, no conferencing)
+    - `supportsVideo`: boolean (optional)
+      If provided, whether or not the application supports video calling (Default: true)
   - `android`: object
     - `alertTitle`: string (required)
       When asking for _phone account_ permission, we need to provider a title for the `Alert` to ask the user for it
@@ -73,6 +79,9 @@ RNCallKeep.setup(options);
     - `imageName`: string (optional)
       The image to use in the Android Phone application's native UI for enabling/disabling calling accounts. Should be a 48x48 HDPI
       grayscale PNG image. Must be in your drawable resources for the parent application.
+    - `additionalPermissions`: [PermissionsAndroid] (optional)
+      Any additional permissions you'd like your app to have at first launch. Can be used to simplify permission flows and avoid
+      multiple popups to the user at different times.
 
 ## Methods
 
