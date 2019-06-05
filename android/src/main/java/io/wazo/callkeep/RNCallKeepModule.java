@@ -378,7 +378,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
 
         if (_settings != null && _settings.getString("imageName") != null) {
 
-            int identifier = appContext.getResources().getIdentifier(_settings.getSTring("imageName"), "drawable", appContext.getPackageName());
+            int identifier = appContext.getResources().getIdentifier(_settings.getString("imageName"), "drawable", appContext.getPackageName());
             Icon icon = Icon.createWithResource(appContext, identifier);
             builder.setIcon(icon);
         }
