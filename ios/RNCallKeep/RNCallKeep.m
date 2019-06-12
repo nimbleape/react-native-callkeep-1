@@ -212,6 +212,12 @@ RCT_EXPORT_METHOD(_startCallActionEventListenerAdded)
     _isStartCallActionEventListenerAdded = YES;
 }
 
+RCT_EXPORT_METHOD(reportConnectingOutgoingCallWithUUID:(NSString *)uuidString)
+{
+    NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:uuidString];
+    [self.callKeepProvider reportOutgoingCallWithUUID:uuid startedConnectingAtDate:[NSDate date]];
+}
+
 RCT_EXPORT_METHOD(reportConnectedOutgoingCallWithUUID:(NSString *)uuidString)
 {
     NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:uuidString];

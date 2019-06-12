@@ -67,6 +67,10 @@ class RNCallKeep {
     RNCallKeepModule.startCall(uuid, handle, handleType, hasVideo, contactIdentifier);
   };
 
+  reportConnectingOutgoingCallWithUUID = (uuid) => {
+    RNCallKeepModule.reportConnectingOutgoingCallWithUUID(uuid);
+  };
+
   reportConnectedOutgoingCallWithUUID = (uuid) => {
     RNCallKeepModule.reportConnectedOutgoingCallWithUUID(uuid);
   };
