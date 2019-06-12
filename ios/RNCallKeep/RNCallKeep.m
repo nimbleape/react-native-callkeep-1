@@ -458,8 +458,6 @@ continueUserActivity:(NSUserActivity *)userActivity
 #endif
     //do this first, audio sessions are flakey
     [self configureAudioSession];
-    //tell the system we took it
-    [self.callKeepProvider reportOutgoingCallWithUUID:action.callUUID startedConnectingAtDate:[NSDate date]];
     //tell the JS to actually make the call
     [self sendEventWithName:RNCallKeepDidReceiveStartCallAction body:@{ @"callUUID": action.callUUID.UUIDString, @"number": action.handle.value }];
     [action fulfill];
