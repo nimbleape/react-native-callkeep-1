@@ -68,11 +68,17 @@ class RNCallKeep {
   };
 
   reportConnectingOutgoingCallWithUUID = (uuid) => {
-    RNCallKeepModule.reportConnectingOutgoingCallWithUUID(uuid);
+    //only available on iOS
+    if (isIOS) {
+      RNCallKeepModule.reportConnectingOutgoingCallWithUUID(uuid);
+    }
   };
 
   reportConnectedOutgoingCallWithUUID = (uuid) => {
-    RNCallKeepModule.reportConnectedOutgoingCallWithUUID(uuid);
+    //only available on iOS
+    if (isIOS) {
+      RNCallKeepModule.reportConnectedOutgoingCallWithUUID(uuid);
+    }
   };
 
   endCall = (uuid) => {
