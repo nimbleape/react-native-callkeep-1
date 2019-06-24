@@ -517,7 +517,9 @@ continueUserActivity:(NSUserActivity *)userActivity
 #ifdef DEBUG
     NSLog(@"[RNCallKeep][CXProviderDelegate][provider:performSetMutedCallAction]");
 #endif
-    [self sendEventWithName:RNCallKeepDidPerformSetMutedCallAction body:@{ @"muted": @(action.muted) }];
+    NSString *callUUID = [self containsLowerCaseLetter:action.callUUID.UUIDString] ? action.callUUID.UUIDString : [action.callUUID.UUIDString lowercaseString];
+
+    [self sendEventWithName:RNCallKeepDidPerformSetMutedCallAction body:@{ @"muted": @(action.muted), @"callUUID": callUUID }];
     [action fulfill];
 }
 

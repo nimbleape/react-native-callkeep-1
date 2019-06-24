@@ -487,24 +487,23 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
                     break;
                 case ACTION_MUTE_CALL:
                     args.putBoolean("muted", true);
-
+                    args.putString("callUUID", attributeMap.get(EXTRA_CALL_UUID));
                     sendEventToJS("RNCallKeepDidPerformSetMutedCallAction", args);
                     break;
                 case ACTION_UNMUTE_CALL:
                     args.putBoolean("muted", false);
-
+                    args.putString("callUUID", attributeMap.get(EXTRA_CALL_UUID));
                     sendEventToJS("RNCallKeepDidPerformSetMutedCallAction", args);
                     break;
                 case ACTION_DTMF_TONE:
                     args.putString("dtmf", attributeMap.get("DTMF"));
-
+                    args.putString("callUUID", attributeMap.get(EXTRA_CALL_UUID));
                     sendEventToJS("RNCallKeepDidPerformDTMFAction", args);
                     break;
                 case ACTION_ONGOING_CALL:
                     args.putString("number", attributeMap.get(EXTRA_CALL_NUMBER));
                     args.putString("callUUID", attributeMap.get(EXTRA_CALL_UUID));
                     args.putString("name", attributeMap.get(EXTRA_CALLER_NAME));
-
                     sendEventToJS("RNCallKeepDidReceiveStartCallAction", args);
                     break;
                 case ACTION_AUDIO_SESSION:

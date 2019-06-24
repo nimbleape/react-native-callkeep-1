@@ -344,7 +344,7 @@ RNCallKeep.addEventListener('didDisplayIncomingCall', ({ error }) => {
 A call was muted by the system or the user:
 
 ```js
-RNCallKeep.addEventListener('didPerformSetMutedCallAction', (muted) => {
+RNCallKeep.addEventListener('didPerformSetMutedCallAction', ({ muted, callUUID }) => {
 
 });
 
@@ -466,12 +466,12 @@ class RNCallKeepExample extends React.Component {
   };
 
   onToggleMute = (data) => {
-    let { muted } = data;
+    let { muted, callUUID } = data;
     // Called when the system or user mutes a call
   };
 
   onToggleHold = (data) => {
-    let { hold } = data;
+    let { hold, callUUID } = data;
     // Called when the system or user holds a call
   };
 

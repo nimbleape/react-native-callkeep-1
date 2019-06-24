@@ -33,7 +33,7 @@ import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_NUMBER;
 import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_UUID;
 
 @TargetApi(Build.VERSION_CODES.M)
-public class VoiceConnection extends Connection {private String TAG = "VoiceConnection";
+public class VoiceConnection extends Connection {
     private boolean isMuted = false;
     private HashMap<String, String> handle;
     private Context context;
