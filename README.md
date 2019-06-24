@@ -46,7 +46,8 @@ const options = {
     alertDescription: 'This application needs to access your phone accounts',
     cancelButton: 'Cancel',
     okButton: 'ok',
-    imageName: 'phone_account_icon"
+    imageName: 'phone_account_icon',
+    additionalPermissions: [PermissionsAndroid.PERMISSIONS.example]
   }
 };
 
@@ -88,7 +89,7 @@ RNCallKeep.setup(options);
 ### setAvailable
 _This feature is available only on Android._
 
-Tell _ConnectionService_ that the device is ready to accept outgoing calls.
+Tell _ConnectionService_ that the device is ready to make outgoing calls.
 If not the user will be stuck in the build UI screen without any actions.
 Eg: Call it with `false` when disconnected from the sip client, when your token expires ...
 
@@ -97,21 +98,34 @@ RNCallKeep.setAvailable(true);
 ```
 
 - `active`: boolean
-  - Tell whenever the app is ready or not
+  - Tell whether the app is ready or not
+
+### setCurrentCallActive
+_This feature is available only on Android._
+
+Mark the current call as active (eg: when the callee has answered).
+Necessary to set the correct Android capabilities (hold, mute) once the call is set as active.
+
+```js
+RNCallKeep.setCurrentCallActive(uuid);
+```
+
+- `uuid`: string
+  - The `uuid` used for `startCall` or `displayIncomingCall`
 
 ### displayIncomingCall
 
-Display system UI for incoming call
+Display system UI for incoming calls
 
 ````js
-RNCallKeep.displayIncomingCall(uuid, handle);
+RNCallKeep.displayIncomingCall(uuid, handle, localizedCallerName);
 ````
 
 - `uuid`: string
   - An `uuid` that should be stored and re-used for `stopCall`.
 - `handle`: string
   - Phone number of the caller
-- `localizedCallerName`: string (optional, iOS only)
+- `localizedCallerName`: string (optional)
   - Name of the caller to be displayed on the native UI
 - `handleType`: string (optional, iOS only)
   - `generic`
@@ -125,16 +139,17 @@ RNCallKeep.displayIncomingCall(uuid, handle);
 ### startCall
 
 When you make an outgoing call, tell the device that a call is occurring.
-_This feature is available only on iOs._
 
 ```js
-RNCallKeep.startCall(uuid, number);
+RNCallKeep.startCall(uuid, number, contactIdentifier);
 ```
 
 - _uuid_: string
   - An `uuid` that should be stored and re-used for `stopCall`.
 - `handle`: string
   - Phone number of the callee
+- `contactIdentifier`: string
+  - The identifier is displayed in the native call UI, and is typically the name of the call recipient.
 - `handleType`: string (optional, iOS only)
   - `generic`
   - `number` (default)
@@ -142,8 +157,21 @@ RNCallKeep.startCall(uuid, number);
 - `hasVideo`: boolean (optional, iOS only)
   - `false` (default)
   - `true` (you know... when not false)
-- `contactIdentifier`: string (optional)
-  - The identifier is displayed in the native call UI, and is typically the name of the call recipient.
+
+
+### updateDisplay
+_This feature is available only on Android._
+
+Sets the Android caller name and number
+Use this to update the Android display after an outgoing call has started
+
+```js
+RNCallKeep.updateDisplay(localizedCallerName, handle)
+```
+- `handle`: string
+  - Phone number of the caller
+- `localizedCallerName`: string (optional)
+  - Name of the caller to be displayed on the native UI
 
 
 ### endCall
@@ -157,19 +185,9 @@ RNCallKeep.endCall(uuid);
 - `uuid`: string
   - The `uuid` used for `startCall` or `displayIncomingCall`
 
-### setCurrentCallActive
-
-Mark the current call as active (eg: when the callee as answered).
-
-```js
-RNCallKeep.setCurrentCallActive();
-```
-
-
 ### setMutedCall
 
 Switch the mic on/off.
-_This feature is available only on iOs._
 
 ```js
 RNCallKeep.setMutedCall(uuid, true);
@@ -178,6 +196,18 @@ RNCallKeep.setMutedCall(uuid, true);
 - `uuid`: string
   - uuid of the current call.
 - `muted`: boolean
+
+### setOnHold
+
+Set a call on/off hold.
+
+```js
+RNCallKeep.setOnHold(uuid, true)
+```
+
+- `uuid`: string
+  - uuid of the current call.
+- `hold`: boolean
 
 ### checkIfBusy
 
@@ -243,14 +273,13 @@ RNCallKeep.hasDefaultPhoneAccount(options);
 
 ### didReceiveStartCallAction
 
-User start call action from _Recents_ (Or _Contact_ on Android) in built-in phone app.
+Device sends this event once it decides the app is allowed to start a call, either from the built-in phone screens (iOS/_Recents_, Android/_Contact_),
+or by the app calling `RNCallKeep.startCall`.
 
-Try to start your call action from here (e.g. get credentials of the user by `data.handle` and/or send INVITE to your SIP server)
-
-After all works are done, remember to call `RNCallKeep.startCall(uuid, calleeNumber)`
+Try to start your app call action from here (e.g. get credentials of the user by `data.handle` and/or send INVITE to your SIP server)
 
 ```js
-RNCallKeep.addEventListener('didReceiveStartCallAction', ({ handle }) => {
+RNCallKeep.addEventListener('didReceiveStartCallAction', ({ number, callUUID, name }) => {
 
 });
 ```
@@ -306,7 +335,7 @@ RNCallKeep.addEventListener('didDisplayIncomingCall', ({ error }) => {
 });
 ```
 
-- `error` (?string)
+- `error` (string)
   - iOS only.
 
 ### - didPerformSetMutedCallAction
@@ -362,19 +391,37 @@ class RNCallKeepExample extends React.Component {
 
     this.currentCallId = null;
 
-    // Initialise RNCallKeep
+    // Add RNCallKeep Events
+    RNCallKeep.addEventListener('didReceiveStartCallAction', this.didReceiveStartCallAction);
+    RNCallKeep.addEventListener('answerCall', this.onAnswerCallAction);
+    RNCallKeep.addEventListener('endCall', this.onEndCallAction);
+    RNCallKeep.addEventListener('didDisplayIncomingCall', this.onIncomingCallDisplayed);
+    RNCallKeep.addEventListener('didPerformSetMutedCallAction', this.onToggleMute);
+    RNCallKeep.addEventListener('didToggleHoldCallAction', this.onToggleHold);
+    RNCallKeep.addEventListener('didPerformDTMFAction', this.onDTMFAction);
+    RNCallKeep.addEventListener('didActivateAudioSession', this.audioSessionActivated);
+  }
+
+  // Initialise RNCallKeep
+  setup = () => {
     const options = {
       ios: {
-        appName: 'WazoReactNativeDemo',
+        appName: 'ReactNativeWazoDemo',
+        imageName: 'sim_icon',
+        supportsVideo: false,
+        maximumCallGroups: '1',
+        maximumCallsPerCallGroup: '1'
       },
       android: {
-        alertTitle: 'Permissions required',
-        alertDescription: 'This application needs to access your phone accounts',
+        alertTitle: 'Permissions Required',
+        alertDescription:
+          'This application needs to access your phone calling accounts to make calls',
         cancelButton: 'Cancel',
         okButton: 'ok',
+        imageName: 'sim_icon',
+        additionalPermissions: [PermissionsAndroid.PERMISSIONS.READ_CONTACTS]
       }
     };
-
 
     try {
       RNCallKeep.setup(options);
@@ -382,40 +429,55 @@ class RNCallKeepExample extends React.Component {
     } catch (err) {
       console.error('initializeCallKeep error:', err.message);
     }
-
-    // Add RNCallKeep Events
-    RNCallKeep.addEventListener('didReceiveStartCallAction', this.onNativeCall);
-    RNCallKeep.addEventListener('answerCall', this.onAnswerCallAction);
-    RNCallKeep.addEventListener('endCall', this.onEndCallAction);
-    RNCallKeep.addEventListener('didDisplayIncomingCall', this.onIncomingCallDisplayed);
-    RNCallKeep.addEventListener('didPerformSetMutedCallAction', this.onToggleMute);
-    RNCallKeep.addEventListener('didActivateAudioSession', this.audioSessionActivated);
   }
 
-  onNativeCall = ({ handle }) => {
+  // Use startCall to ask the system to start a call - Initiate an outgoing call from this point
+  startCall = ({ handle, localizedCallerName }) => {
     // Your normal start call action
-
-    RNCallKeep.startCall(this.getCurrentCallId(), handle);
+    RNCallKeep.startCall(this.getCurrentCallId(), handle, localizedCallerName);
   };
 
-  onAnswerCallAction = ({ callUUID }) => {
-    // called when the user answer the incoming call
+  // Event Listener Callbacks
+
+  didReceiveStartCallAction(data) => {
+    let { number, callUUID, name } = data;
+    // Get this event after the system decides you can start a call
+    // You can now start a call from within your app
   };
 
-  onEndCallAction = ({ callUUID }) => {
+  onAnswerCallAction = (data) => {
+    let { callUUID } = data;
+    // Called when the user answers an incoming call
+  };
+
+  onEndCallAction = (data) => {
+    let { callUUID } = data;
     RNCallKeep.endCall(this.getCurrentCallId());
 
     this.currentCallId = null;
   };
 
-  onIncomingCallDisplayed = error => {
+  // Currently iOS only
+  onIncomingCallDisplayed = (data) => {
+    let { error } = data;
     // You will get this event after RNCallKeep finishes showing incoming call UI
     // You can check if there was an error while displaying
   };
 
-  onToggleMute = (muted) => {
-    // Called when the system or the user mutes a call
+  onToggleMute = (data) => {
+    let { muted } = data;
+    // Called when the system or user mutes a call
   };
+
+  onToggleHold = (data) => {
+    let { hold } = data;
+    // Called when the system or user holds a call
+  };
+
+  onDTMFAction = (data) => {
+    let { dtmf } = data;
+    // Called when the system or user performs a DTMF action
+  }
 
   audioSessionActivated = (data) => {
     // you might want to do following things when receiving this event:
@@ -437,7 +499,7 @@ class RNCallKeepExample extends React.Component {
 
 ## Notes
 
-- On iOS, you should call `setup` each time you want to use callKeep.
+- Call setup once to initiate callkeep.
 
 ## Contributing
 

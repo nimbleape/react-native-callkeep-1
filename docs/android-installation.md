@@ -22,7 +22,7 @@ project(':react-native-callkeep').projectDir = new File(rootProject.projectDir, 
 3. In `android/app/src/main/java/.../MainApplication.java`:
 
 ```java
-import io.wazo.callkeep.RNCallKeepPackage; // Add this import line with others
+import io.wazo.callkeep.RNCallKeepPackage; // Add this import line
 //...
 
 private static List<ReactPackage> getPackages() {
@@ -36,7 +36,9 @@ private static List<ReactPackage> getPackages() {
 4. Add permissionResult listener in `MainActivity.java`:
 
 ```java
-import io.wazo.callkeep.RNCallKeepModule; // Add this import line with others
+import io.wazo.callkeep.RNCallKeepModule; // Add these import lines
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 public class MainActivity extends ReactActivity {
     // ...
