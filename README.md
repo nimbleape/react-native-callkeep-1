@@ -79,7 +79,8 @@ RNCallKeep.setup(options);
       Ok button label
     - `imageName`: string (optional)
       The image to use in the Android Phone application's native UI for enabling/disabling calling accounts. Should be a 48x48 HDPI
-      grayscale PNG image. Must be in your drawable resources for the parent application.
+      grayscale PNG image. Must be in your drawable resources for the parent application. Must be lowercase and underscore (_) characters
+      only, as Java doesn't like capital letters on resources.
     - `additionalPermissions`: [PermissionsAndroid] (optional)
       Any additional permissions you'd like your app to have at first launch. Can be used to simplify permission flows and avoid
       multiple popups to the user at different times.

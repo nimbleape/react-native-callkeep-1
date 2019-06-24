@@ -67,8 +67,18 @@ class RNCallKeep {
     RNCallKeepModule.startCall(uuid, handle, handleType, hasVideo, contactIdentifier);
   };
 
+  reportConnectingOutgoingCallWithUUID = (uuid) => {
+    //only available on iOS
+    if (isIOS) {
+      RNCallKeepModule.reportConnectingOutgoingCallWithUUID(uuid);
+    }
+  };
+
   reportConnectedOutgoingCallWithUUID = (uuid) => {
-    RNCallKeepModule.reportConnectedOutgoingCallWithUUID(uuid);
+    //only available on iOS
+    if (isIOS) {
+      RNCallKeepModule.reportConnectedOutgoingCallWithUUID(uuid);
+    }
   };
 
   endCall = (uuid) => {
@@ -153,7 +163,7 @@ class RNCallKeep {
   _setupAndroid = async (options) => {
     RNCallKeepModule.setup(options);
 
-    const showAccountAlert = await RNCallKeepModule.checkPhoneAccountPermission(options.additionalPermissions);
+    const showAccountAlert = await RNCallKeepModule.checkPhoneAccountPermission(options.additionalPermissions || []);
     const shouldOpenAccounts = await this._alert(options, showAccountAlert);
 
     if (shouldOpenAccounts) {

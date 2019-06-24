@@ -92,11 +92,6 @@ public class VoiceConnectionService extends ConnectionService {
         Connection incomingCallConnection = createConnection(request);
         incomingCallConnection.setRinging();
 
-        if (name != null && number != null) {
-            incomingCallConnection.setAddress(number, TelecomManager.PRESENTATION_ALLOWED);
-            incomingCallConnection.setCallerDisplayName(name, TelecomManager.PRESENTATION_ALLOWED);
-        }
-
         return incomingCallConnection;
     }
 
@@ -142,6 +137,7 @@ public class VoiceConnectionService extends ConnectionService {
 
         Bundle extras = request.getExtras();
         HashMap<String, String> extrasMap = this.bundleToMap(extras);
+        extrasMap.put(EXTRA_CALL_NUMBER, request.getAddress().toString());
         connection = new VoiceConnection(this, extrasMap);
         connection.setConnectionCapabilities(Connection.CAPABILITY_MUTE | Connection.CAPABILITY_SUPPORT_HOLD);
         connection.setInitializing();

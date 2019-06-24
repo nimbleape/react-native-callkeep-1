@@ -212,6 +212,12 @@ RCT_EXPORT_METHOD(_startCallActionEventListenerAdded)
     _isStartCallActionEventListenerAdded = YES;
 }
 
+RCT_EXPORT_METHOD(reportConnectingOutgoingCallWithUUID:(NSString *)uuidString)
+{
+    NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:uuidString];
+    [self.callKeepProvider reportOutgoingCallWithUUID:uuid startedConnectingAtDate:[NSDate date]];
+}
+
 RCT_EXPORT_METHOD(reportConnectedOutgoingCallWithUUID:(NSString *)uuidString)
 {
     NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:uuidString];
@@ -458,8 +464,6 @@ continueUserActivity:(NSUserActivity *)userActivity
 #endif
     //do this first, audio sessions are flakey
     [self configureAudioSession];
-    //tell the system we took it
-    [self.callKeepProvider reportOutgoingCallWithUUID:action.callUUID startedConnectingAtDate:[NSDate date]];
     //tell the JS to actually make the call
     [self sendEventWithName:RNCallKeepDidReceiveStartCallAction body:@{ @"callUUID": action.callUUID.UUIDString, @"number": action.handle.value }];
     [action fulfill];
@@ -471,9 +475,7 @@ continueUserActivity:(NSUserActivity *)userActivity
 #ifdef DEBUG
     NSLog(@"[RNCallKeep][CXProviderDelegate][provider:performAnswerCallAction]");
 #endif
-    if (![self lessThanIos10_2]) {
-        [self configureAudioSession];
-    }
+    [self configureAudioSession];
     NSString *callUUID = [self containsLowerCaseLetter:action.callUUID.UUIDString] ? action.callUUID.UUIDString : [action.callUUID.UUIDString lowercaseString];
     [self sendEventWithName:RNCallKeepPerformAnswerCallAction body:@{ @"callUUID": callUUID }];
     [action fulfill];
@@ -531,6 +533,7 @@ continueUserActivity:(NSUserActivity *)userActivity
 #ifdef DEBUG
     NSLog(@"[RNCallKeep][CXProviderDelegate][provider:didActivateAudioSession]");
 #endif
+    [self configureAudioSession];
     [self sendEventWithName:RNCallKeepDidActivateAudioSession body:nil];
 }
 
