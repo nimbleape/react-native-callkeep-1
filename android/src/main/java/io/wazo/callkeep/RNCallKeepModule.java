@@ -30,6 +30,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.util.Log;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -88,6 +89,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     private static final String[] permissions = { Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.CALL_PHONE, Manifest.permission.RECORD_AUDIO };
 
+    private static final String TAG = "RNCallKeepModule";
     private static TelecomManager telecomManager;
     private static Promise hasPhoneAccountPromise;
     private ReactApplicationContext reactContext;
@@ -126,6 +128,8 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
             return;
         }
 
+        Log.d(TAG, "displayIncomingCall number: " + number + ", callerName: " + callerName);
+
         Bundle extras = new Bundle();
         Uri uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, number, null);
 
@@ -152,9 +156,11 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void startCall(String uuid, String number, String callerName) {
-        if (!isConnectionServiceAvailable() || !hasPhoneAccount() || !hasPermissions()) {
+        if (!isConnectionServiceAvailable() || !hasPhoneAccount() || !hasPermissions() || number == null) {
             return;
         }
+
+        Log.d(TAG, "startCall number: " + number + ", callerName: " + callerName);
 
         Bundle extras = new Bundle();
         Uri uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, number, null);
@@ -172,6 +178,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void endCall(String uuid) {
+        Log.d(TAG, "endCall called");
         if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
             return;
         }
@@ -183,6 +190,8 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
 
         conn.onDisconnect();
         VoiceConnectionService.deinitConnection();
+
+        Log.d(TAG, "endCall executed");
     }
 
     @ReactMethod

@@ -37,6 +37,7 @@ public class VoiceConnection extends Connection {private String TAG = "VoiceConn
     private boolean isMuted = false;
     private HashMap<String, String> handle;
     private Context context;
+    private static final String TAG = "RNCK:VoiceConnection";
 
     VoiceConnection(Context context, HashMap<String, String> handle) {
         super();
@@ -73,12 +74,15 @@ public class VoiceConnection extends Connection {private String TAG = "VoiceConn
     @Override
     public void onAnswer() {
         super.onAnswer();
+        Log.d(TAG, "onAnswer called");
 
         setConnectionCapabilities(getConnectionCapabilities() | Connection.CAPABILITY_HOLD);
         setActive();
         setAudioModeIsVoip(true);
 
         sendCallRequestToActivity(ACTION_ANSWER_CALL, handle);
+        sendCallRequestToActivity(ACTION_AUDIO_SESSION, null);
+        Log.d(TAG, "onAnswer executed");
     }
 
     @Override
@@ -90,17 +94,21 @@ public class VoiceConnection extends Connection {private String TAG = "VoiceConn
     @Override
     public void onDisconnect() {
         super.onDisconnect();
+        Log.d(TAG, "onDisconnect called");
         setDisconnected(new DisconnectCause(DisconnectCause.LOCAL));
         sendCallRequestToActivity(ACTION_END_CALL, handle);
+        Log.d(TAG, "onDisconnect executed");
         destroy();
     }
 
     @Override
     public void onAbort() {
         super.onAbort();
+        Log.d(TAG, "onAbort called");
 
         setDisconnected(new DisconnectCause(DisconnectCause.CANCELED));
         sendCallRequestToActivity(ACTION_END_CALL, handle);
+        Log.d(TAG, "onAbort executed");
         destroy();
     }
 
@@ -121,9 +129,11 @@ public class VoiceConnection extends Connection {private String TAG = "VoiceConn
     @Override
     public void onReject() {
         super.onReject();
+        Log.d(TAG, "onReject called");
 
         setDisconnected(new DisconnectCause(DisconnectCause.CANCELED));
         sendCallRequestToActivity(ACTION_END_CALL, handle);
+        Log.d(TAG, "onReject executed");
         destroy();
     }
 

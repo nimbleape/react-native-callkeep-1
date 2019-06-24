@@ -63,7 +63,7 @@ import static io.wazo.callkeep.RNCallKeepModule.handle;
 public class VoiceConnectionService extends ConnectionService {
     private static VoiceConnection connection;
     private static Boolean isAvailable = false;
-    private static String TAG = "VoiceConnectionService";
+    private static String TAG = "RNCK:VoiceConnectionService";
     private static Map<String, VoiceConnection> currentConnections = new HashMap<>();
 
     public static Connection getConnection() {
@@ -72,7 +72,7 @@ public class VoiceConnectionService extends ConnectionService {
 
     public VoiceConnectionService() {
         super();
-        Log.e(TAG, "xxx");
+        Log.e(TAG, "Constructor");
     }
 
     public static void setAvailable(Boolean value) {
@@ -81,6 +81,7 @@ public class VoiceConnectionService extends ConnectionService {
 
 
     public static void deinitConnection() {
+        Log.d(TAG, "deinitConnection");
         connection = null;
     }
 

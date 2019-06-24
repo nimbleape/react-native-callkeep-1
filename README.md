@@ -502,6 +502,14 @@ class RNCallKeepExample extends React.Component {
 
 - Call setup once to initiate callkeep.
 
+## Debug
+
+### Android
+
+```
+adb logcat *:S RNCallKeepModule:V
+```
+
 ## Contributing
 
 Any pull request, issue report and suggestion are highly welcome!
