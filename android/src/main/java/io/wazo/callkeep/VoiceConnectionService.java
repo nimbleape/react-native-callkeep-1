@@ -207,6 +207,9 @@ public class VoiceConnectionService extends ConnectionService {
         while(iterator.hasNext()) {
             String key = iterator.next();
             extrasMap.put(key, extras.getString(key));
+            if (extras.get(key) != null) {
+                extrasMap.put(key, extras.get(key).toString());
+            }
         }
         return extrasMap;
     }
