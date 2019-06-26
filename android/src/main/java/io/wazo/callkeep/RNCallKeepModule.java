@@ -269,19 +269,19 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setMutedCall(String uuid, boolean isMuted) {
+    public void setMutedCall(String uuid, boolean shouldMute) {
         Connection conn = VoiceConnectionService.getConnection();
         if (conn == null) {
             return;
         }
 
         CallAudioState newAudioState = null;
-        // if current state is set to mute, set new state to not muted
-        if (isMuted) {
-            newAudioState = new CallAudioState(false, conn.getCallAudioState().getRoute(),
+        //if the requester wants to mute, do that. otherwise unmute
+        if (shouldMute) {
+            newAudioState = new CallAudioState(true, conn.getCallAudioState().getRoute(),
                     conn.getCallAudioState().getSupportedRouteMask());
         } else {
-            newAudioState = new CallAudioState(true, conn.getCallAudioState().getRoute(),
+            newAudioState = new CallAudioState(false, conn.getCallAudioState().getRoute(),
                     conn.getCallAudioState().getSupportedRouteMask());
         }
         conn.onCallAudioStateChanged(newAudioState);
