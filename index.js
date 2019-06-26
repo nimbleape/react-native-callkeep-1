@@ -140,12 +140,12 @@ class RNCallKeep {
     RNCallKeepModule.updateDisplay(displayName, uri)
   }
 
-  setOnHold = (uuid, isOnHold) => {
+  setOnHold = (uuid, shouldHold) => {
     if (!isIOS) {
-      RNCallKeepModule.setOnHold(uuid, isOnHold);
+      RNCallKeepModule.setOnHold(uuid, shouldHold);
     } else {
-      // TODO: Check iOS functionality
-      RNCallKeepModule.setOnHold(isOnHold)
+      // TODO: iOS hold currently not enabled on native calls
+      RNCallKeepModule.setOnHold(shouldHold)
     }
   }
 
