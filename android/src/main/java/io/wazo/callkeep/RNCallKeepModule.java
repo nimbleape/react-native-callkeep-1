@@ -255,16 +255,16 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setOnHold(String uuid, boolean isOnHold) {
+    public void setOnHold(String uuid, boolean shouldHold) {
         Connection conn = VoiceConnectionService.getConnection();
         if (conn == null) {
             return;
         }
 
-        if (isOnHold == true) {
-            conn.onUnhold();
-        } else {
+        if (shouldHold == true) {
             conn.onHold();
+        } else {
+            conn.onUnhold();
         }
     }
 
