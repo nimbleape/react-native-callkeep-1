@@ -139,8 +139,15 @@ RNCallKeep.displayIncomingCall(uuid, handle, localizedCallerName);
 
 ### startCall
 
-When you make an outgoing call, tell the device that a call is occurring.
+When you make an outgoing call, tell the device that a call is occurring. The argument list is slightly
+different on iOS and Android:
 
+iOS:
+```js
+RNCallKeep.startCall(uuid, handle, handleType, hasVideo, contactIdentifier);
+```
+
+Android:
 ```js
 RNCallKeep.startCall(uuid, number, contactIdentifier);
 ```
@@ -213,7 +220,7 @@ RNCallKeep.setOnHold(uuid, true)
 ### checkIfBusy
 
 Checks if there are any active calls on the device and returns a promise with a boolean value (`true` if there're active calls, `false` otherwise).
-_This feature is available only on iOs._
+_This feature is available only on iOS._
 
 ```js
 RNCallKeep.checkIfBusy();
@@ -222,7 +229,7 @@ RNCallKeep.checkIfBusy();
 ### checkSpeaker
 
 Checks if the device speaker is on and returns a promise with a boolean value (`true` if speaker is on, `false` otherwise).
-_This feature is available only on iOs._
+_This feature is available only on iOS._
 
 ```js
 RNCallKeep.checkSpeaker();
