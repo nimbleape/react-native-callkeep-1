@@ -150,17 +150,17 @@ RCT_EXPORT_METHOD(displayIncomingCall:(NSString *)uuidString
 }
 
 RCT_EXPORT_METHOD(startCall:(NSString *)uuidString
-                     handle:(NSString *)handle
+                     number:(NSString *)number
+          contactIdentifier:(NSString * _Nullable)contactIdentifier
                  handleType:(NSString *)handleType
-                      video:(BOOL)video
-          contactIdentifier:(NSString * _Nullable)contactIdentifier)
+                      video:(BOOL)video)
 {
 #ifdef DEBUG
     NSLog(@"[RNCallKeep][startCall] uuidString = %@", uuidString);
 #endif
     int _handleType = [self getHandleType:handleType];
     NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:uuidString];
-    CXHandle *callHandle = [[CXHandle alloc] initWithType:_handleType value:handle];
+    CXHandle *callHandle = [[CXHandle alloc] initWithType:_handleType value:number];
     CXStartCallAction *startCallAction = [[CXStartCallAction alloc] initWithCallUUID:uuid handle:callHandle];
     [startCallAction setVideo:video];
     [startCallAction setContactIdentifier:contactIdentifier];

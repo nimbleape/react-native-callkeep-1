@@ -144,7 +144,7 @@ different on iOS and Android:
 
 iOS:
 ```js
-RNCallKeep.startCall(uuid, handle, handleType, hasVideo, contactIdentifier);
+RNCallKeep.startCall(uuid, number, contactIdentifier, handleType, hasVideo);
 ```
 
 Android:
@@ -154,7 +154,7 @@ RNCallKeep.startCall(uuid, number, contactIdentifier);
 
 - _uuid_: string
   - An `uuid` that should be stored and re-used for `stopCall`.
-- `handle`: string
+- `number`: string
   - Phone number of the callee
 - `contactIdentifier`: string
   - The identifier is displayed in the native call UI, and is typically the name of the call recipient.
