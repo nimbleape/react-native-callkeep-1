@@ -288,6 +288,16 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void sendDTMF(String uuid, String key) {
+        Connection conn = VoiceConnectionService.getConnection();
+        if (conn == null) {
+            return;
+        }
+        char dtmf = key.charAt(0);
+        conn.onPlayDtmfTone(dtmf);
+    }
+
+    @ReactMethod
     public void updateDisplay(String displayName, String uri) {
         Connection conn = VoiceConnectionService.getConnection();
         if (conn == null) {
