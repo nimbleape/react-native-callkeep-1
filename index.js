@@ -144,8 +144,7 @@ class RNCallKeep {
     if (!isIOS) {
       RNCallKeepModule.setOnHold(uuid, shouldHold);
     } else {
-      // TODO: iOS hold currently not enabled on native calls
-      RNCallKeepModule.setOnHold(shouldHold)
+      RNCallKeepModule.setHeldCall(shouldHold)
     }
   }
 
