@@ -144,7 +144,7 @@ class RNCallKeep {
     if (!isIOS) {
       RNCallKeepModule.setOnHold(uuid, shouldHold);
     } else {
-      RNCallKeepModule.setHeldCall(shouldHold)
+      RNCallKeepModule.setHeldCall(uuid, shouldHold)
     }
   }
 
