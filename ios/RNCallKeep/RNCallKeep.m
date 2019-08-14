@@ -541,7 +541,7 @@ RCT_EXPORT_METHOD(reportUpdatedCall:(NSString *)uuidString contactIdentifier:(NS
     [rtcAudioSession setIsAudioEnabled:NO];
     [rtcAudioSession setUseManualAudio:NO];
 
-    [action fulfillWithDateEnded:[NSDate date]];
+    [action fulfill];
 }
 
 -(void)provider:(CXProvider *)provider performSetHeldCallAction:(CXSetHeldCallAction *)action
