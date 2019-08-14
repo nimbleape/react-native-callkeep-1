@@ -14,6 +14,9 @@
 #import <React/RCTUtils.h>
 
 #import <AVFoundation/AVAudioSession.h>
+#import <AVFoundation/AVFoundation.h>
+
+#import <WebRTC/RTCAudioSession.h>
 
 static int const DelayInSeconds = 3;
 
@@ -387,6 +390,9 @@ RCT_EXPORT_METHOD(sendDTMF:(NSString *)uuidString dtmf:(NSString *)key)
     NSTimeInterval bufferDuration = .005;
     [audioSession setPreferredIOBufferDuration:bufferDuration error:nil];
     [audioSession setActive:TRUE error:nil];
+
+    RTCAudioSession* rtcAudioSession = [RTCAudioSession sharedInstance];
+    [rtcAudioSession setUseManualAudio:YES];
 }
 
 + (BOOL)application:(UIApplication *)application
@@ -530,6 +536,11 @@ RCT_EXPORT_METHOD(reportUpdatedCall:(NSString *)uuidString contactIdentifier:(NS
     NSLog(@"[RNCallKeep][CXProviderDelegate][provider:performEndCallAction]");
 #endif
     [self sendEventWithName:RNCallKeepPerformEndCallAction body:@{ @"callUUID": [action.callUUID.UUIDString lowercaseString] }];
+
+    RTCAudioSession* rtcAudioSession = [RTCAudioSession sharedInstance];
+    [rtcAudioSession setIsAudioEnabled:NO];
+    [rtcAudioSession setUseManualAudio:NO];
+
     [action fulfill];
 }
 
@@ -574,6 +585,11 @@ RCT_EXPORT_METHOD(reportUpdatedCall:(NSString *)uuidString contactIdentifier:(NS
     NSLog(@"[RNCallKeep][CXProviderDelegate][provider:didActivateAudioSession]");
 #endif
     [self configureAudioSession];
+
+    RTCAudioSession* rtcAudioSession = [RTCAudioSession sharedInstance];
+    [rtcAudioSession setIsAudioEnabled:YES];
+    [rtcAudioSession activateAudioUnit];
+
     [self sendEventWithName:RNCallKeepDidActivateAudioSession body:nil];
 }
 
@@ -582,6 +598,10 @@ RCT_EXPORT_METHOD(reportUpdatedCall:(NSString *)uuidString contactIdentifier:(NS
 #ifdef DEBUG
     NSLog(@"[RNCallKeep][CXProviderDelegate][provider:didDeactivateAudioSession]");
 #endif
+
+    RTCAudioSession* rtcAudioSession = [RTCAudioSession sharedInstance];
+    [rtcAudioSession deactivateAudioUnit];
+
     [self sendEventWithName:RNCallKeepDidDeactivateAudioSession body:nil];
 }
 
