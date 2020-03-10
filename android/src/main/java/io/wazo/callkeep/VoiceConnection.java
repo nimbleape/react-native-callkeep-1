@@ -47,7 +47,7 @@ import static io.wazo.callkeep.RNCallKeepModule.ACTION_UNHOLD_CALL;
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_UNMUTE_CALL;
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_SHOW_INCOMING_CALL_UI;
 import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALLER_NAME;
-import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_NUMBER;
+import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_IDENTIFER;
 import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_UUID;
 
 @TargetApi(Build.VERSION_CODES.M)
@@ -62,11 +62,11 @@ public class VoiceConnection extends Connection {
         this.handle = handle;
         this.context = context;
 
-        String number = handle.get(EXTRA_CALL_NUMBER);
+        String identifier = handle.get(EXTRA_CALL_IDENTIFER);
         String name = handle.get(EXTRA_CALLER_NAME);
 
-        if (number != null) {
-            setAddress(Uri.parse(number), TelecomManager.PRESENTATION_ALLOWED);
+        if (identifier != null) {
+            setAddress(Uri.parse(identifier), TelecomManager.PRESENTATION_ALLOWED);
         }
         if (name != null && !name.equals("")) {
             setCallerDisplayName(name, TelecomManager.PRESENTATION_ALLOWED);

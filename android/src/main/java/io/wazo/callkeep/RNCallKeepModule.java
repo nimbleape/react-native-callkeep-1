@@ -44,6 +44,7 @@ import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
+import android.telecom.VideoProfile;
 import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
@@ -75,7 +76,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     public static final String CHECKING_PERMS = "CHECKING_PERMS";
     public static final String EXTRA_CALLER_NAME = "EXTRA_CALLER_NAME";
     public static final String EXTRA_CALL_UUID = "EXTRA_CALL_UUID";
-    public static final String EXTRA_CALL_NUMBER = "EXTRA_CALL_NUMBER";
+    public static final String EXTRA_CALL_IDENTIFIER = "EXTRA_CALL_IDENTIFIER";
     public static final String ACTION_END_CALL = "ACTION_END_CALL";
     public static final String ACTION_ANSWER_CALL = "ACTION_ANSWER_CALL";
     public static final String ACTION_MUTE_CALL = "ACTION_MUTE_CALL";
@@ -137,19 +138,23 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void displayIncomingCall(String uuid, String number, String callerName) {
+    public void displayIncomingCall(String uuid, String identifier, String callerType, boolean callHasVideo, String callerName) {
         if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
             return;
         }
 
-        Log.d(TAG, "displayIncomingCall number: " + number + ", callerName: " + callerName);
+        Log.d(TAG, "displayIncomingCall identifier: " + identifier + ", callerName: " + callerName);
 
         Bundle extras = new Bundle();
-        Uri uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, number, null);
+        Uri uri = Uri.fromParts(callerType.equals('sip') ? PhoneAccount.SCHEME_SIP : PhoneAccount.SCHEME_TEL, identifier, null);
 
         extras.putParcelable(TelecomManager.EXTRA_INCOMING_CALL_ADDRESS, uri);
         extras.putString(EXTRA_CALLER_NAME, callerName);
         extras.putString(EXTRA_CALL_UUID, uuid);
+
+        if (callHasVideo) {
+            extras.putParcelable(TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE, VideoProfile.STATE_BIDIRECTIONAL);
+        }
 
         telecomManager.addNewIncomingCall(handle, extras);
     }
@@ -169,24 +174,28 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void startCall(String uuid, String number, String callerName) {
-        if (!isConnectionServiceAvailable() || !hasPhoneAccount() || !hasPermissions() || number == null) {
-            Log.d(TAG, "startCall ignored: " + isConnectionServiceAvailable() + ", " + hasPhoneAccount() + ", " + hasPermissions() + ", " + number);
+    public void startCall(String uuid, String identifer, String callerName, String callerType, boolean callHasVideo) {
+        if (!isConnectionServiceAvailable() || !hasPhoneAccount() || !hasPermissions() || identifer == null) {
+            Log.d(TAG, "startCall ignored: " + isConnectionServiceAvailable() + ", " + hasPhoneAccount() + ", " + hasPermissions() + ", " + identifer);
             return;
         }
 
-        Log.d(TAG, "startCall number: " + number + ", callerName: " + callerName);
+        Log.d(TAG, "startCall identifer: " + identifer + ", callerName: " + callerName);
 
         Bundle extras = new Bundle();
-        Uri uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, number, null);
+        Uri uri = Uri.fromParts(callerType.equals('sip') ? PhoneAccount.SCHEME_SIP : PhoneAccount.SCHEME_TEL, identifer, null);
 
         Bundle callExtras = new Bundle();
         callExtras.putString(EXTRA_CALLER_NAME, callerName);
         callExtras.putString(EXTRA_CALL_UUID, uuid);
-        callExtras.putString(EXTRA_CALL_NUMBER, number);
+        callExtras.putString(EXTRA_CALL_IDENTIFIER, identifer);
 
         extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, handle);
         extras.putParcelable(TelecomManager.EXTRA_OUTGOING_CALL_EXTRAS, callExtras);
+
+        if (callHasVideo) {
+            extras.putParcelable(TelecomManager.EXTRA_INCOMING_VIDEO_STATE, VideoProfile.STATE_BIDIRECTIONAL);
+        }
 
         telecomManager.placeCall(uri, extras);
     }
@@ -586,7 +595,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
                     sendEventToJS("RNCallKeepDidPerformDTMFAction", args);
                     break;
                 case ACTION_ONGOING_CALL:
-                    args.putString("handle", attributeMap.get(EXTRA_CALL_NUMBER));
+                    args.putString("handle", attributeMap.get(EXTRA_CALL_IDENTIFIER));
                     args.putString("callUUID", attributeMap.get(EXTRA_CALL_UUID));
                     args.putString("name", attributeMap.get(EXTRA_CALLER_NAME));
                     sendEventToJS("RNCallKeepDidReceiveStartCallAction", args);
@@ -598,7 +607,7 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
                     sendEventToJS("RNCallKeepCheckReachability", null);
 					break;
                 case ACTION_SHOW_INCOMING_CALL_UI:
-                    args.putString("handle", attributeMap.get(EXTRA_CALL_NUMBER));
+                    args.putString("handle", attributeMap.get(EXTRA_CALL_IDENTIFIER));
                     args.putString("callUUID", attributeMap.get(EXTRA_CALL_UUID));
                     args.putString("name", attributeMap.get(EXTRA_CALLER_NAME));
                     sendEventToJS("RNCallKeepShowIncomingCallUi", args);

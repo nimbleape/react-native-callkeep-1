@@ -263,7 +263,7 @@ RCT_EXPORT_METHOD(updateDisplay:(NSString *)uuidString :(NSString *)displayName 
     NSLog(@"[RNCallKeep][updateDisplay] uuidString = %@ displayName = %@ uri = %@", uuidString, displayName, uri);
 #endif
     NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:uuidString];
-    CXHandle *callHandle = [[CXHandle alloc] initWithType:CXHandleTypePhoneNumber value:uri];
+    CXHandle *callHandle = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:uri];
     CXCallUpdate *callUpdate = [[CXCallUpdate alloc] init];
     callUpdate.localizedCallerName = displayName;
     callUpdate.remoteHandle = callHandle;
@@ -396,7 +396,7 @@ RCT_EXPORT_METHOD(sendDTMF:(NSString *)uuidString dtmf:(NSString *)key)
     providerConfiguration.supportsVideo = YES;
     providerConfiguration.maximumCallGroups = 3;
     providerConfiguration.maximumCallsPerCallGroup = 1;
-    providerConfiguration.supportedHandleTypes = [NSSet setWithObjects:[NSNumber numberWithInteger:CXHandleTypePhoneNumber], nil];
+    providerConfiguration.supportedHandleTypes = [NSSet setWithObjects:[NSNumber numberWithInteger:CXHandleTypeGeneric], nil];
     if (settings[@"supportsVideo"]) {
         providerConfiguration.supportsVideo = [settings[@"supportsVideo"] boolValue];
     }
