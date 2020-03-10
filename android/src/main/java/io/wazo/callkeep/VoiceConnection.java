@@ -47,7 +47,7 @@ import static io.wazo.callkeep.RNCallKeepModule.ACTION_UNHOLD_CALL;
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_UNMUTE_CALL;
 import static io.wazo.callkeep.RNCallKeepModule.ACTION_SHOW_INCOMING_CALL_UI;
 import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALLER_NAME;
-import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_IDENTIFER;
+import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_IDENTIFIER;
 import static io.wazo.callkeep.RNCallKeepModule.EXTRA_CALL_UUID;
 
 @TargetApi(Build.VERSION_CODES.M)
@@ -62,7 +62,7 @@ public class VoiceConnection extends Connection {
         this.handle = handle;
         this.context = context;
 
-        String identifier = handle.get(EXTRA_CALL_IDENTIFER);
+        String identifier = handle.get(EXTRA_CALL_IDENTIFIER);
         String name = handle.get(EXTRA_CALLER_NAME);
 
         if (identifier != null) {
@@ -97,7 +97,7 @@ public class VoiceConnection extends Connection {
         super.onAnswer();
         Log.d(TAG, "onAnswer called");
 
-        setConnectionCapabilities(getConnectionCapabilities() | Connection.CAPABILITY_HOLD);
+        setConnectionCapabilities(getConnectionCapabilities());
         setAudioModeIsVoip(true);
 
         sendCallRequestToActivity(ACTION_ANSWER_CALL, handle);
