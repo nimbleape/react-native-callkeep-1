@@ -129,6 +129,8 @@ public class RNCallKeepModule extends ReactContextBaseJavaModule {
             this.registerEvents();
             VoiceConnectionService.setAvailable(true);
         }
+
+        VoiceConnectionService.setSettings(options);
     }
 
     @ReactMethod
